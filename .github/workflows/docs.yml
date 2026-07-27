@@ -25,7 +25,7 @@ jobs:
         run: poetry install
       - name: Install Torch in Poetry
         run: poetry run pip install torch
-      - run: poetry run pdoc --math -d google kernel_elastic_autoencoder
+      - run: poetry run pdoc --math -d google kernel_elastic_autoencoder -o ./docs
 
       - uses: actions/upload-pages-artifact@v4
         with:
