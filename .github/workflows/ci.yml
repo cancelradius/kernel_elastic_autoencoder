@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.12"
+    - name: Install Poetry
+      run: pipx install poetry
+    - name: Install package with Poetry
+      run: poetry install
+    - name: Install Torch in Poetry
+      run: poetry run pip install torch
+    - name: Lint code with Ruff
+      run: poetry run ruff check --output-format=github --target-version=py312
+    - name: Check code formatting with Ruff
+      run: poetry run ruff format --target-version=py312
+    - name: Test with pytest
+      run: poetry run pytest --junitxml=junit/pytest.xml --cov=kernel_elastic_autoencoder --cov-report=xml:coverage.xml --cov-fail-under=80
+    - name: Upload pytest test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: junit/pytest.xml
+      if: ${{ always() }}
+    - name: Upload pytest coverage results
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-results
+        path: coverage.xml
+      if: ${{ always() }}

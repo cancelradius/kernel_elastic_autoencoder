@@ -1,0 +1,46 @@
+[project]
+name = "kernel_elastic_autoencoder"
+version = "0.0.0"
+description = "Implementation of Kernel-Elastic Autoencoder for Molecular Design (https://doi.org/10.1093/pnasnexus/pgae168)"
+authors = [
+    { name = "Felix Rotter-McCartney", email = "felix.rotter@mail.utoronto.ca" }
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12,<3.15"
+dependencies = [
+    "pydantic (>=2.13.4,<3.0.0)",
+    "huggingface-hub (>=1.22.0,<2.0.0)",
+    "pandas (>=3.0.3,<4.0.0)",
+    "safetensors (>=0.8.0,<0.9.0)",
+]
+
+[tool.poetry]
+packages = [{ include = "kernel_elastic_autoencoder", from = "src" }]
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+commit_parser = "conventional"
+build_command = "pip install build && python -m build --sdist --wheel ."
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
+prerelease = false
+
+[tool.semantic_release.remote.token]
+env = "GH_TOKEN"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "ruff (>=0.15.20,<0.17.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "pytest-xdist (>=3.8.0,<4.0.0)",
+    "ty (>=0.0.62,<0.0.64)",
+    "python-semantic-release (>=10.6.1,<11.0.0)",
+    "pdoc (>=16.0.0,<17.0.0)",
+]
