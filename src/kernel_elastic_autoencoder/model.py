@@ -78,47 +78,6 @@ class Model(
         )
         """Model decoder module."""
 
-    @classmethod
-    def from_pretrained(
-        cls: type[T],
-        pretrained_model_name_or_path: str | Path,
-        *,
-        force_download: bool = False,
-        token: str | bool | None = None,
-        cache_dir: str | Path | None = None,
-        local_files_only: bool = False,
-        revision: str | None = None,
-        **model_kwargs,
-    ) -> T:
-        return cls.from_pretrained(
-            pretrained_model_name_or_path,
-            force_download=force_download,
-            token=token,
-            cache_dir=cache_dir,
-            local_files_only=local_files_only,
-            revision=revision,
-            **model_kwargs,
-        )
-
-    def save_pretrained(
-        self,
-        save_directory: str | Path,
-        *,
-        config: dict | DataclassInstance | None = None,
-        repo_id: str | None = None,
-        push_to_hub: bool = False,
-        model_card_kwargs: dict[str, Any] | None = None,
-        **push_to_hub_kwargs,
-    ) -> str | None:
-        return super().save_pretrained(
-            save_directory,
-            config=config,
-            repo_id=repo_id,
-            push_to_hub=push_to_hub,
-            model_card_kwargs=model_card_kwargs,
-            **push_to_hub_kwargs,
-        )
-
     def forward(
         self,
         input_ids: torch.Tensor,
