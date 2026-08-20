@@ -31,7 +31,7 @@ class Completion(BaseModel):
     """Tensor containing generated condition masks for reuse."""
 
 
-class Pipeline[_T]:
+class Pipeline[T]:
     """User-facing pipeline for inference.
 
     Defines an easy-to-use API for decoder-only inference with a pretrained model.
@@ -51,7 +51,7 @@ class Pipeline[_T]:
         self,
         model: Model,
         tokenizer: Tokenizer,
-        collator: Callable[[ModelConfig, Tokenizer], Collator[_T]] = DataframeCollator,
+        collator: Callable[[ModelConfig, Tokenizer], Collator[T]] = DataframeCollator,
         sampler: Callable[[Tokenizer], Sampler] = Top1Sampler,
         device: torch.device | None = None,
     ) -> None:
@@ -87,7 +87,7 @@ class Pipeline[_T]:
     def _completion_entry(
         self,
         latents: torch.Tensor,
-        dataset: _T,
+        dataset: T,
         seq_feature: str,
         cond_features: list[str],
         device: torch.device | None = None,
@@ -158,7 +158,7 @@ class Pipeline[_T]:
     def completion(
         self,
         latents: torch.Tensor,
-        dataset: _T,
+        dataset: T,
         seq_feature: str,
         cond_features: list[str],
         device: torch.device | None = None,
