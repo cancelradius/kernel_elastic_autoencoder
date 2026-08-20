@@ -18,6 +18,9 @@ dependencies = [
 [tool.poetry]
 packages = [{ include = "kernel_elastic_autoencoder", from = "src" }]
 
+[tool.ruff.lint]
+ignore = ["B008"]
+
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
 commit_parser = "conventional"
