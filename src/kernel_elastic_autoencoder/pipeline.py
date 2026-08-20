@@ -148,7 +148,7 @@ class Pipeline[_T]:
         self, intermediate: CompletionIntermediate, **kwargs
     ) -> Completion:
         return Completion(
-            outputs=self.tokenizer.decode(
+            outputs=self.sampler(
                 intermediate.input_ids, skip_special_tokens=True
             ),
             condition_embeddings=intermediate.condition_embeddings,
