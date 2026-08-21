@@ -29,7 +29,7 @@ class Sampler(ABC):
         """Interface method for implementing the last sampling step where outputs are decoded through the tokenizer.
 
         Args:
-            logits: Tensor of dimension (B, S, L) containing logits at the last step of inference.
+            logits: Tensor of dimension (B, S) containing IDs at the last step of inference.
             **kwargs: Keyword arguments.
 
         Returns:
