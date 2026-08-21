@@ -53,7 +53,7 @@ class TestTransformerEmbedding:
             30,
             1,
             padding_idx,
-            -100.0,
+            padding_value,
         )
         x = filled(padding_idx, (1, 10))
         c = filled(padding_value, (1, 1))

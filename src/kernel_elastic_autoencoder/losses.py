@@ -121,7 +121,7 @@ class Loss(nn.Module):
             / (2 * (self.hp_sigma**2))
         ).sum()
         loss = self.hp_lambda * (
-            torch.tensor([1])
+            torch.tensor(1, dtype=latents.dtype, device=latents.device)
             - ((1 / (latents.size(0) * self.kernel_dist_size)) * kernel_pairwise_sum)
         )
         return loss

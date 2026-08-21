@@ -10,7 +10,7 @@ class TestTop1Sampler:
             0, sampler.tokenizer.vocab_size, (batch_size, seq_length)
         )
         one_hot = F.one_hot(ground_truth, sampler.tokenizer.vocab_size)
-        assert sampler(one_hot, skip_special_tokens=False) == sampler.tokenizer.decode(
+        assert sampler(sampler.sample_ids(one_hot), skip_special_tokens=False) == sampler.tokenizer.decode(
             ground_truth, skip_special_tokens=False
         )
 
