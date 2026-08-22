@@ -1,4 +1,3 @@
-
 import torch
 from huggingface_hub import PyTorchModelHubMixin
 from torch import nn
@@ -174,5 +173,13 @@ class Model(
         ).to(torch.bool)
         return self.decoder(current_output, latents, condition_embeddings, padding_mask)
 
-    def embed_conditions(self, conditions):
+    def embed_conditions(self, conditions: torch.Tensor) -> torch.Tensor:
+        """Basic interface for the separate embedding of condition vectors.
+
+        Args:
+            conditions: Tensor of dimension (B, C) containing condition values for each sequence.
+
+        Returns:
+            torch.Tensor: Tensor of dimension (B, C, E) containing condition embeddings for each sequence.
+        """
         return self.encoder.embedding.conditional_embedding(conditions)
