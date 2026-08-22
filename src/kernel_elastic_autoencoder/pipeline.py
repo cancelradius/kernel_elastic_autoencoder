@@ -2,29 +2,9 @@ from collections.abc import Iterable
 from types import SimpleNamespace
 
 import torch
-from pydantic import BaseModel, ConfigDict
 
 from kernel_elastic_autoencoder.model import Model
 from kernel_elastic_autoencoder.tokenizer import Tokenizer
-
-
-class CompletionIntermediate(SimpleNamespace):
-    latents: torch.Tensor
-    input_ids: torch.Tensor
-    batches_completed: torch.Tensor
-    condition_embeddings: torch.Tensor
-    condition_mask: torch.Tensor
-
-
-class Completion(SimpleNamespace):
-    """Return schema for Pipeline.completion."""
-
-    outputs: Iterable[str]
-    """Iterable of generated output sequences."""
-    condition_embeddings: torch.Tensor
-    """Tensor containing generated condition embeddings for reuse."""
-    condition_mask: torch.Tensor
-    """Tensor containing generated condition masks for reuse."""
 
 
 class Pipeline:
@@ -166,8 +146,7 @@ class Pipeline:
             **kwargs: Additional keyword arguments passed to Tokenizer.encode.
 
         Returns:
-            Completion: Completion object, containing outputs, as well as condition embeddings and
-                masks for reuse.
+            Iterable[str]: List of completed sequences, stripped of special tokens.
         """
         intermediate = self._completion_entry(
             latents=latents,

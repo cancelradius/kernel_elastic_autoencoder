@@ -13,13 +13,12 @@ from kernel_elastic_autoencoder.config import (
 )
 from kernel_elastic_autoencoder.losses import Loss
 from kernel_elastic_autoencoder.model import Model
-from kernel_elastic_autoencoder.pipeline import Completion, Pipeline
+from kernel_elastic_autoencoder.pipeline import Pipeline
 from kernel_elastic_autoencoder.tokenizer import Tokenizer
 from kernel_elastic_autoencoder.training import Trainer, TrainerCallback
 
 __all__ = [
     "Collated",
-    "Completion",
     "ExperimentConfig",
     "Loss",
     "Model",
