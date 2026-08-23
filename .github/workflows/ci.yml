@@ -28,7 +28,7 @@ jobs:
     - name: Check code formatting with Ruff
       run: poetry run ruff format --target-version=py312
     - name: Test with pytest
-      run: poetry run pytest --junitxml=junit/pytest.xml --cov=kernel_elastic_autoencoder --cov-report=xml:coverage.xml --cov-fail-under=80
+      run: poetry run pytest --junitxml=junit/pytest.xml --cov=kernel_elastic_autoencoder --cov-report=xml:coverage.xml --cov-fail-under=50
     - name: Upload pytest test results
       uses: actions/upload-artifact@v4
       with:

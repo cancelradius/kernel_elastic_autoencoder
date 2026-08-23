@@ -19,7 +19,7 @@ class Pipeline:
 
         Getting a completion for sequences:
         >>> compl = pipe.completion(latents, ["abc", "def", "ghi"], [[1.0, 0.5], [2.0, 1.0], [3.0, 1.5]])
-        >>> print(compl.outputs)
+        >>> print(compl)
     """
 
     def __init__(
@@ -58,7 +58,7 @@ class Pipeline:
             max_length=self.model.config_typed.input.max_len,
             add_special_tokens=False,
             **kwargs,
-        )
+        ).to(self.device)
         conditions = torch.as_tensor(conditions, dtype=torch.float, device=device)
         condition_mask = (
             conditions != self.model.config_typed.common.padding_value
