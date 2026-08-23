@@ -2,6 +2,48 @@
 
 <!-- version list -->
 
+## v3.0.0 (2026-08-23)
+
+### Bug Fixes
+
+- Training checkpoint epoch tracking and correct load
+  ([`bb75df2`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/bb75df248e606c00b53dc3fd64d05c31d0faaca7))
+
+### Chores
+
+- Clean imports from previous breaking API change
+  ([`29d64cb`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/29d64cbeec2cb0ec94b8cb119a829fa719b880bc))
+
+- Remove orphaned __init__ imports from Trainer refactor
+  ([`072ad13`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/072ad1398578461debb90bcdfb360f52f7f5611a))
+
+- Remove orphaned SimpleNamespace import in pipeline.py
+  ([`3df9cd2`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/3df9cd27adf005ccde2378ec570500c4280a182c))
+
+### Documentation
+
+- Add missing docstring to embed_conditions
+  ([`35e44f3`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/35e44f338b22cfce4f37bc73ab348e32f7718dca))
+
+### Features
+
+- **api**: Remove Collated schema and streamline training input
+  ([`fb7f436`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/fb7f43605f3cd7e1357b96770a6ade48543b1d1a))
+
+- **api**: Streamline API by changing sampler and collator interfaces
+  ([`6e190ea`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/6e190ea3342ca64f350bbc91d2f4889619e25b77))
+
+### Refactoring
+
+- Refactor of Trainer and integration of HF Accelerate
+  ([`d9e7ddf`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/d9e7ddffda0922e90603a86ff20880f20728e221))
+
+### Testing
+
+- Remove dummy tokenizer and related tests
+  ([`5631f75`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/5631f757d9187c855131ff4bfe226892d3d6912e))
+
+
 ## v2.0.0 (2026-08-21)
 
 ### Bug Fixes
