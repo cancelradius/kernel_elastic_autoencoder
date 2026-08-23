@@ -1,4 +1,3 @@
-from kernel_elastic_autoencoder.collate import Collated
 from kernel_elastic_autoencoder.config import (
     ExperimentConfig,
     ModelCommonConfig,
@@ -18,7 +17,6 @@ from kernel_elastic_autoencoder.tokenizer import Tokenizer
 from kernel_elastic_autoencoder.training import Trainer, TrainerCallback
 
 __all__ = [
-    "Collated",
     "ExperimentConfig",
     "Loss",
     "Model",

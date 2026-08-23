@@ -1,17 +1,18 @@
 import os
+from collections.abc import Iterable
+from types import SimpleNamespace
 from typing import Protocol
 
 import torch
 import torch.distributed as dist
-from pydantic import BaseModel, ConfigDict
 from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DistributedSampler
 
-from kernel_elastic_autoencoder.collate import Collated
 from kernel_elastic_autoencoder.config import TrainingConfig
 from kernel_elastic_autoencoder.losses import Loss
 from kernel_elastic_autoencoder.model import Model
+from kernel_elastic_autoencoder.tokenizer import Tokenizer
 
 
 def _is_local():
@@ -20,8 +21,7 @@ def _is_local():
     ) or not dist.is_torchelastic_launched()
 
 
-class TrainerCallbackCtx(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+class TrainerCallbackCtx(SimpleNamespace):
     dist: bool
     device_type: str
     local_rank: int | None
@@ -149,19 +149,27 @@ class Trainer:
     def train(
         self,
         model: Model,
-        ds: Collated,
+        tokenizer: Tokenizer,
+        sequences: Iterable[str],
+        conditions: Iterable[Iterable[float]] | torch.Tensor,
         train_split: float = 0.9,
         checkpoint: str = "./checkpoint",
     ):
-        """Trains a model with a Collated dataset. Optionally resumes from an existing checkpoint.
+        """Trains a model on sequences and conditions. Optionally, resumes from an existing checkpoint.
 
         Args:
             model: Freshly instantiated model.
-            ds: Tensor dataset following the Collated schema.
+            tokenizer: Pre-configured Tokenizer object. The Tokenizer protocol supports tokenizers
+                inheriting from transformers.PreTrainedTokenizerBase, so such tokenizers may be loaded
+                from HuggingFace Hub.
+            sequences: Iterable of text sequences.
+            conditions: Iterable of iterables of condition values per sequence.
             train_split: Fraction of dataset used for training. Must be between 0 and 1.
             checkpoint: Path of local checkpoint to be saved and/or resumed.
         """
-        next_epoch = self._setup(model, ds, train_split, checkpoint)
+        next_epoch = self._setup(
+            model, tokenizer, sequences, conditions, train_split, checkpoint
+        )
         for epoch in range(next_epoch, self.config_typed.common.max_epochs):
             self._ctx.rel_epoch = epoch - next_epoch
             self._epoch(epoch, checkpoint)
@@ -174,7 +182,9 @@ class Trainer:
     def _setup(
         self,
         model: Model,
-        ds: Collated,
+        tokenizer: Tokenizer,
+        sequences: Iterable[str],
+        conditions: Iterable[Iterable[float]] | torch.Tensor,
         train_split: float,
         checkpoint: str,
     ):
@@ -190,7 +200,7 @@ class Trainer:
         self._loss_fn = self._setup_loss(model)
         self._optimizer, self._scheduler = self._setup_optimizer()
         self._dataloader_train, self._dataloader_test = self._setup_dataloaders(
-            ds, train_split
+            model, tokenizer, sequences, conditions, train_split
         )
         next_epoch = 0
         if os.path.exists(checkpoint):
@@ -242,9 +252,41 @@ class Trainer:
         device_type, _ = self._get_backend()
         return device_type, None
 
-    def _setup_dataloaders(self, ds: Collated, train_split: float):
+    def _ingest(
+        self,
+        model: Model,
+        tokenizer: Tokenizer,
+        sequences: Iterable[str],
+        conditions: Iterable[Iterable[float]] | torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        input_ids = tokenizer.encode(
+            seq=sequences,
+            padding=True,
+            max_length=model.config_typed.input.max_len,
+            add_special_tokens=True,
+        )
+        conditions = torch.as_tensor(conditions, dtype=torch.float)
+        token_mask = (input_ids != model.config_typed.common.padding_idx).to(
+            torch.bool
+        )
+        condition_mask = (conditions != model.config_typed.common.padding_value).to(
+            torch.bool
+        )
+        return input_ids, conditions, token_mask, condition_mask
+
+    def _setup_dataloaders(
+        self,
+        model: Model,
+        tokenizer: Tokenizer,
+        sequences: Iterable[str],
+        conditions: Iterable[Iterable[float]] | torch.Tensor,
+        train_split: float,
+    ):
+        input_ids, conditions, token_mask, condition_mask = self._ingest(
+            model, tokenizer, sequences, conditions
+        )
         dataset = torch.utils.data.TensorDataset(
-            ds.input_ids, ds.conditions, ds.token_mask, ds.condition_mask
+            input_ids, conditions, token_mask, condition_mask
         )
         dataset_train, dataset_test = torch.utils.data.random_split(
             dataset, [train_split, 1 - train_split]
