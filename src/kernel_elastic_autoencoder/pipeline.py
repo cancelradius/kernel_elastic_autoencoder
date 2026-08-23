@@ -19,7 +19,7 @@ class Pipeline:
 
         Getting a completion for sequences:
         >>> compl = pipe.completion(latents, ["abc", "def", "ghi"], [[1.0, 0.5], [2.0, 1.0], [3.0, 1.5]])
-        >>> print(compl.outputs)
+        >>> print(compl)
     """
 
     def __init__(
