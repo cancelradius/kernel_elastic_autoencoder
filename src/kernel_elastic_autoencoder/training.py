@@ -51,7 +51,6 @@ class Trainer:
             checkpoint: Path of local checkpoint to be saved and/or resumed.
         """
         accelerator = Accelerator()
-        device = accelerator.device
 
         loss_fn = Loss(
             hp_lambda=self.config_typed.hyperparameters.hp_lambda,
@@ -95,21 +94,30 @@ class Trainer:
             dataset_test,
             batch_size=self.config_typed.common.batch_size,
         )
+        curr_epoch = 0
+
+        model, optimizer, dataloader_train, dataloader_test, scheduler, curr_epoch = (
+            accelerator.prepare(
+                model,
+                optimizer,
+                dataloader_train,
+                dataloader_test,
+                scheduler,
+                curr_epoch,
+            )
+        )
+        accelerator.register_for_checkpointing(scheduler, curr_epoch)
 
         if os.path.exists(checkpoint):
             accelerator.load_state(checkpoint)
 
-        model, optimizer, dataloader_train, scheduler = accelerator.prepare(
-            model, optimizer, dataloader_train, scheduler
-        )
-
-        for epoch in range(self.config_typed.common.max_epochs):
+        for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
             model.train()
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_train, desc=f"Epoch {epoch}, Train Batch"
             ):
                 optimizer.zero_grad()
-                prediction, prediction_noise, latents_noise = model.forward(
+                prediction, prediction_noise, latents_noise = model(
                     input_ids, conditions, token_mask, condition_mask
                 )
                 loss = loss_fn(
@@ -117,14 +125,13 @@ class Trainer:
                 )
                 accelerator.backward(loss)
                 optimizer.step()
-                train_loss = loss.detach()
 
             model.eval()
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_test, desc=f"Epoch {epoch}, Test Batch"
             ):
                 with torch.no_grad():
-                    prediction, prediction_noise, latents_noise = model.forward(
+                    prediction, prediction_noise, latents_noise = model(
                         input_ids,
                         conditions,
                         token_mask,
@@ -133,14 +140,14 @@ class Trainer:
                     loss = loss_fn(
                         prediction, prediction_noise, input_ids[:, 1:], latents_noise
                     )
-                test_loss = loss.detach()
 
-            optimizer.step()
             scheduler.step(epoch)
 
-            os.makedirs(os.path.join(checkpoint, "/dist/"), exist_ok=True)
-            model.save_pretrained(os.path.join(checkpoint, "/dist/"))
+            accelerator.wait_for_everyone()
+            curr_epoch += 1
+            os.makedirs(os.path.join(checkpoint, "dist/"), exist_ok=True)
+            model.save_pretrained(os.path.join(checkpoint, "dist/"))
             self.config_typed.to_json(
-                os.path.join(checkpoint, "/dist/train_config.json")
+                os.path.join(checkpoint, "dist/train_config.json")
             )
             accelerator.save_state(checkpoint)
