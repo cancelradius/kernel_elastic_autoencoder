@@ -1,6 +1,6 @@
 [project]
 name = "kernel_elastic_autoencoder"
-version = "3.0.0"
+version = "3.0.1"
 description = "Implementation of Kernel-Elastic Autoencoder for Molecular Design (https://doi.org/10.1093/pnasnexus/pgae168)"
 authors = [
     { name = "Felix Rotter-McCartney", email = "felix.rotter@mail.utoronto.ca" }

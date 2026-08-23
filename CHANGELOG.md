@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v3.0.1 (2026-08-23)
+
+### Bug Fixes
+
+- Move input_ids to correct device before Pipeline inference
+  ([`3c88c13`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/3c88c132559d4b273a63c069a11671d45ae1f6d2))
+
+### Build System
+
+- Temp lower cov-fail-under to allow CI to proceed
+  ([`c639e19`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/c639e192c3eb4ba185fedde5ccb9fa26d7a34c79))
+
+### Documentation
+
+- Remove erroneous reference to Pipeline.completion.outputs
+  ([`f177a1e`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/f177a1e63cd5597e1e0696c50d74623f71f5a408))
+
+
 ## v3.0.0 (2026-08-23)
 
 ### Bug Fixes
