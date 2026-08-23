@@ -58,7 +58,7 @@ class Pipeline:
             max_length=self.model.config_typed.input.max_len,
             add_special_tokens=False,
             **kwargs,
-        )
+        ).to(self.device)
         conditions = torch.as_tensor(conditions, dtype=torch.float, device=device)
         condition_mask = (
             conditions != self.model.config_typed.common.padding_value
