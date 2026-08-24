@@ -125,6 +125,24 @@ class Pipeline:
         device: torch.device | None = None,
         **kwargs,
     ) -> Iterable[str]:
+        """Completes each conditioned input sequence, using the beam search strategy.
+
+        The model completes each sequence in the provided list using decoder-only inference. On the
+        first step, the top `beam_size` first tokens are chosen for each batch. Subsequent tokens are
+        sampled greedily in parallel for every subsequence. Before returning output, the subsequence with
+        the highest sum of token logits is chosen for each batch.
+
+        Args:
+            latents: Tensor of dimension (B, P * E) containing latent vectors for the batch.
+            beam_size: Beam size of first step.
+            sequences: List of text sequences to complete.
+            conditions: List of condition value lists per batch.
+            device: Torch device used for inference.
+            **kwargs: Additional keyword arguments passed to Tokenizer.encode.
+
+        Returns:
+            Iterable[str]: List of completed sequences, stripped of special tokens.
+        """
         input_ids = self.tokenizer.encode(
             seq=sequences,
             padding=False,
