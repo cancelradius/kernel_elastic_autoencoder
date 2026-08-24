@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v3.1.0 (2026-08-24)
+
+### Documentation
+
+- Add beam_completion docstring
+  ([`4af44f9`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/4af44f9ed16ac14e90305f53a7f8fdd951cf38ae))
+
+### Features
+
+- Add beam search algorithm to Pipeline API
+  ([`c09abb4`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/c09abb4970cd68014e2765ab3e9a54fa327eabce))
+
+### Refactoring
+
+- Flatten Pipeline.completion and refactor away private methods
+  ([`a5da582`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/a5da58284830d6a5fb331e52b3a4b3b4f1417774))
+
+
 ## v3.0.1 (2026-08-23)
 
 ### Bug Fixes
