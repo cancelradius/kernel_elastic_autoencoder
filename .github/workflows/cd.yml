@@ -30,6 +30,10 @@ jobs:
         run: |
           git reset --hard ${{ github.sha }}
 
+      - name: Force install gitpython==3.1.59
+        run: |
+          pip install gitpython==3.1.59
+
       - name: Build and version release
         id: release
         uses: python-semantic-release/python-semantic-release@v10.6.1
