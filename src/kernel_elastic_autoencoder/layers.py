@@ -20,20 +20,18 @@ class ConditionEmbedding(nn.Module):
         self,
         condition_channels: int,
         embedding_dim: int,
-        padding_idx: int,
         padding_value: float,
     ):
         super().__init__()
         self.padding_value = padding_value
-        self.padding_idx = padding_idx
         self.embedding = nn.Embedding(
-            condition_channels + 1, embedding_dim, padding_idx=padding_idx
+            condition_channels + 1, embedding_dim, padding_idx=0
         )
         self.register_buffer("indices", torch.arange(1, condition_channels + 1))
 
     def forward(self, c: torch.Tensor):
         indices = self.indices.repeat(c.size(0), 1).to(c.device)  # type: ignore
-        masked_indices = indices.masked_fill(c == self.padding_value, self.padding_idx)
+        masked_indices = indices.masked_fill(c == self.padding_value, 0)
         embedding = self.embedding(masked_indices)
         return embedding * c.unsqueeze(-1).repeat(1, 1, embedding.size(-1))
 
@@ -56,7 +54,9 @@ class TransformerEmbedding(nn.Module):
             max_len, embedding_dim, padding_idx
         )
         self.conditional_embedding = ConditionEmbedding(
-            condition_channels, embedding_dim, padding_idx, padding_value
+            condition_channels,
+            embedding_dim,
+            padding_value,
         )
 
     def forward(self, x: torch.Tensor, c: torch.Tensor | None = None):
