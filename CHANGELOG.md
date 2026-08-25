@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.1.1 (2026-08-25)
+
+### Bug Fixes
+
+- Validate defaults for optimizer and scheduler config functions
+  ([`443b275`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/443b27516aec14d397169fa3c85a157f395166ef))
+
+
 ## v3.1.0 (2026-08-24)
 
 ### Documentation
