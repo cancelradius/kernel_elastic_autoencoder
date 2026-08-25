@@ -217,6 +217,7 @@ class TrainingOptimizerConfig(Config):
     optimizer_fn: ImportString = Field(
         default="torch.optim.AdamW",
         description="Optimizer function import string. Should come from torch.optim.",
+        validate_default=True,
     )
     optimizer_params: dict = Field(
         default={},
@@ -225,6 +226,7 @@ class TrainingOptimizerConfig(Config):
     scheduler_fn: ImportString = Field(
         default="torch.optim.lr_scheduler.LinearLR",
         description="Scheduler function import string. Should come from torch.optim.lr_scheduler.",
+        validate_default=True,
     )
     scheduler_params: dict = Field(
         default={},
