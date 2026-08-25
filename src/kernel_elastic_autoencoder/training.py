@@ -106,10 +106,11 @@ class Trainer:
                 curr_epoch,
             )
         )
-        accelerator.register_for_checkpointing(scheduler, curr_epoch)
+        accelerator.register_for_checkpointing(scheduler)
 
         if os.path.exists(checkpoint):
             accelerator.load_state(checkpoint)
+            curr_epoch = scheduler.scheduler.last_epoch + 1
 
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
             model.train()
