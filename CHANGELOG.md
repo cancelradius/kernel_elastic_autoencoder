@@ -2,6 +2,28 @@
 
 <!-- version list -->
 
+## v3.1.2 (2026-08-25)
+
+### Bug Fixes
+
+- Always use padding_idx 0 for condition masks
+  ([`cdc4bec`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/cdc4bec650445af0626856a67518b9e1c13a0437))
+
+- Force Tokenizer protocol compatibility with transformers.PreTrainedTokenizerBase
+  ([`ae90e20`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/ae90e2074194e1eec258b84a2933abc591c99ddd))
+
+- Move mMMD samples to correct device
+  ([`a48d8b0`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/a48d8b090f21256fb539602079eb4e5857af7154))
+
+- Track last_epoch via scheduler
+  ([`7c0e57b`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/7c0e57b695089c87200f5ccfd667ad5e901afbbf))
+
+### Chores
+
+- Update tokenizer.encode sig to reflect Protocol changes
+  ([`c3a9800`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/c3a9800384cf9a5e66c2a953af1721289b771470))
+
+
 ## v3.1.1 (2026-08-25)
 
 ### Bug Fixes
