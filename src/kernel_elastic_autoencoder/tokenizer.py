@@ -11,8 +11,6 @@ class Tokenizer(Protocol):
     Provides a specification for tokenizing text for model input, and recovering text from token indices.
     """
 
-    vocab_size: int
-    """Number of tokens in the tokenizer's vocabulary."""
     bos_token: str
     """Token marking the beginning of a sequence."""
     bos_token_id: int
@@ -28,20 +26,22 @@ class Tokenizer(Protocol):
 
     def encode(
         self,
-        seq: Iterable[str],
-        padding: bool,
+        text: Iterable[str],
+        padding: str,
         max_length: int,
         add_special_tokens: bool,
+        return_tensors: str,
         **kwargs,
     ) -> torch.Tensor:
         """Encodes an Iterable of sequences to a tensor of indices. Optionally, adds special tokens according to a
         template and pads the outputs to a fixed length.
 
         Args:
-            seq: Iterable of text sequences to encode.
+            text: Iterable of text sequences to encode.
             padding: Whether to pad the sequences to a fixed length.
             max_length: Maximum length to which sequences are padded if padding is True.
             add_special_tokens: Whether to add special tokens according to a template.
+            return_tensors: Tensor return type, must be either 'pt' or 'np'.
             **kwargs: Keyword arguments.
 
         Returns:
@@ -50,12 +50,12 @@ class Tokenizer(Protocol):
         ...
 
     def decode(
-        self, ids: torch.Tensor, skip_special_tokens: bool, **kwargs
+        self, token_ids: torch.Tensor, skip_special_tokens: bool, **kwargs
     ) -> Iterable[str]:
         """Decodes a tensor of indices to an Iterable of sequences. Optionally, skips special tokens.
 
         Args:
-            ids: Tensor of dimension (B, S) containing vocabulary indices to decode.
+            token_ids: Tensor of dimension (B, S) containing vocabulary indices to decode.
             skip_special_tokens: Whether to skip decoding special tokens when constructing outputs.
             **kwargs: Keyword arguments.
 
@@ -78,3 +78,5 @@ class Tokenizer(Protocol):
             Tokenizer: Pretrained tokenizer.
         """
         ...
+
+    def __len__(self) -> int: ...

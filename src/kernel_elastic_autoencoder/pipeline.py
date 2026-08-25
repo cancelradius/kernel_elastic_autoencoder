@@ -69,10 +69,11 @@ class Pipeline:
             Iterable[str]: List of completed sequences, stripped of special tokens.
         """
         input_ids = self.tokenizer.encode(
-            seq=sequences,
-            padding=False,
+            text=sequences,
+            padding='do_not_pad',
             max_length=self.model.config_typed.input.max_len,
             add_special_tokens=False,
+            return_tensors="pt",
             **kwargs,
         ).to(self.device)
         conditions = torch.as_tensor(conditions, dtype=torch.float, device=device)
@@ -144,10 +145,11 @@ class Pipeline:
             Iterable[str]: List of completed sequences, stripped of special tokens.
         """
         input_ids = self.tokenizer.encode(
-            seq=sequences,
-            padding=False,
+            text=sequences,
+            padding='do_not_pad',
             max_length=self.model.config_typed.input.max_len,
             add_special_tokens=False,
+            return_tensors="pt",
             **kwargs,
         ).to(self.device)
         input_probs = torch.zeros_like(input_ids * beam_size)
