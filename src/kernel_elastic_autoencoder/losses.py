@@ -114,7 +114,7 @@ class Loss(nn.Module):
             loc=self._loc,  # type: ignore
             covariance_matrix=self._cov,  # type: ignore
         )
-        samples = mvn.rsample((self.kernel_dist_size,))
+        samples = mvn.rsample((self.kernel_dist_size,)).to(latents.device)
         square_difference_sum = torch.cdist(latents, samples, p=2.0).pow(2)
         kernel_pairwise_sum = torch.exp(
             ((-1 / (self.pooling_dim * self.embedding_dim)) * square_difference_sum)

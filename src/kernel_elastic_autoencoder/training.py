@@ -69,10 +69,11 @@ class Trainer:
         )
 
         input_ids = tokenizer.encode(
-            seq=sequences,
-            padding=True,
+            text=sequences,
+            padding="max_length",
             max_length=model.config_typed.input.max_len,
             add_special_tokens=True,
+            return_tensors="pt",
         )
         conditions = torch.as_tensor(conditions, dtype=torch.float)
         token_mask = (input_ids != model.config_typed.common.padding_idx).to(torch.bool)
@@ -106,10 +107,11 @@ class Trainer:
                 curr_epoch,
             )
         )
-        accelerator.register_for_checkpointing(scheduler, curr_epoch)
+        accelerator.register_for_checkpointing(scheduler)
 
         if os.path.exists(checkpoint):
             accelerator.load_state(checkpoint)
+            curr_epoch = scheduler.scheduler.last_epoch + 1
 
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
             model.train()
