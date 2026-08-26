@@ -139,8 +139,8 @@ class Model(
         padding_mask = (
             torch.cat((token_mask, condition_mask), 1)
             if (token_mask is not None)
-            else torch.cat((torch.full_like(input_ids, True), condition_mask), 1)
-        )
+            else torch.cat((torch.full_like(input_ids, False), condition_mask), 1)
+        ).to(torch.bool)
         return self.encoder(input_ids, conditions, padding_mask)[0]
 
     def decode(
