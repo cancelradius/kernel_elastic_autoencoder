@@ -95,7 +95,7 @@ class Loss(nn.Module):
         prediction_noise: torch.Tensor,
         ground_truth: torch.Tensor,
     ) -> torch.Tensor:
-        ground_truth.to(torch.long)
+        ground_truth = ground_truth.to(torch.long)
         log_softmax = torch.log_softmax(prediction, dim=-1)
         log_softmax_noise = torch.log_softmax(prediction_noise, dim=-1)
         Y = F.one_hot(ground_truth, num_classes=prediction.size(-1))
