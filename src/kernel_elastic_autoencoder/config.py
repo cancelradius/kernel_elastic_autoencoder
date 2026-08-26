@@ -9,8 +9,8 @@ from pydantic import (
     Field,
     FilePath,
     ImportString,
+    NonNegativeFloat,
     NonNegativeInt,
-    PositiveFloat,
     PositiveInt,
 )
 
@@ -110,7 +110,7 @@ class ModelEncoderConfig(Config):
         description="Factor by which the dimension of the hidden layer in the FFNs differs from the dimension of the "
         "input in the encoder. Applies to Transformer and Compression FFNs.",
     )
-    dropout: PositiveFloat = Field(
+    dropout: NonNegativeFloat = Field(
         default=0.0,
         ge=0.0,
         le=1.0,
@@ -136,7 +136,7 @@ class ModelDecoderConfig(Config):
         description="Factor by which the dimension of the hidden layer in the FFNs differs from the dimension of the "
         "input in the decoder. Applies to Transformer and Mixing FFNs.",
     )
-    dropout: PositiveFloat = Field(
+    dropout: NonNegativeFloat = Field(
         default=0.1,
         ge=0.0,
         le=1.0,

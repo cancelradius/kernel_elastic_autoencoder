@@ -108,13 +108,13 @@ class Model(
             input_ids[:, :-1],
             latents,
             condition_embeddings,
-            padding_mask[: self.config_typed.input.max_len - 1],
+            padding_mask[:, : self.config_typed.input.max_len - 1],
         )
         prediction_noise = self.decoder(
             input_ids[:, :-1],
             latents_noise,
             condition_embeddings,
-            padding_mask[: self.config_typed.input.max_len - 1],
+            padding_mask[:, : self.config_typed.input.max_len - 1],
         )
         return prediction, prediction_noise, latents_noise
 
@@ -139,8 +139,8 @@ class Model(
         padding_mask = (
             torch.cat((token_mask, condition_mask), 1)
             if (token_mask is not None)
-            else torch.cat((torch.full_like(input_ids, True), condition_mask), 1)
-        )
+            else torch.cat((torch.full_like(input_ids, False), condition_mask), 1)
+        ).to(torch.bool)
         return self.encoder(input_ids, conditions, padding_mask)[0]
 
     def decode(
@@ -149,7 +149,6 @@ class Model(
         latents: torch.Tensor,
         condition_embeddings: torch.Tensor,
         token_mask: torch.Tensor | None,
-        condition_mask: torch.Tensor,
     ) -> torch.Tensor:
         """Basic interface for a forward pass through the Model.model.decoder module.
 
@@ -161,15 +160,13 @@ class Model(
                 be produced using Model.embed_conditions.
             token_mask: Tensor of dimension (B, S) containing boolean padding masks for each sequence. If None is
                 passed, the absence of padding is assumed.
-            condition_mask: Tensor of dimension (B, C) containing boolean condition padding masks for each sequence.
 
         Returns:
             torch.Tensor: Tensor of dimension (B, S, L) containing prediction logits produced by the decoder.
         """
-        padding_mask = (
-            torch.cat((token_mask, condition_mask), 1)
+        padding_mask = (token_mask
             if (token_mask is not None)
-            else torch.cat((torch.full_like(current_output, False), condition_mask), 1)
+            else torch.full_like(current_output, False)
         ).to(torch.bool)
         return self.decoder(current_output, latents, condition_embeddings, padding_mask)
 
