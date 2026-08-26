@@ -37,20 +37,21 @@ class Pipeline:
                 from HuggingFace Hub.
             device: Torch device used for inference.
         """
-        self.model = model.to(device)
+        self.device = device
+        """Torch device used for inference."""
+        if self.device is None:
+            self.device = torch.device("cpu")
+        self.model = model.to(self.device)
         """Pre-trained Model object for inference. Moved to Pipeline.device, and placed in eval() mode."""
         self.model.eval()
         self.tokenizer = tokenizer
         """Pre-configured Tokenizer object."""
-        self.device = device
-        """Torch device used for inference."""
 
     def completion(
         self,
         latents: torch.Tensor,
         sequences: list[str],
         conditions: list[list[float]] | torch.Tensor,
-        device: torch.device | None = None,
         **kwargs,
     ) -> Iterable[str]:
         """Completes each conditioned input sequence.
@@ -62,7 +63,6 @@ class Pipeline:
             latents: Tensor of dimension (B, P * E) containing latent vectors for the batch.
             sequences: List of text sequences to complete.
             conditions: List of condition value lists per batch.
-            device: Torch device used for inference.
             **kwargs: Additional keyword arguments passed to Tokenizer.encode.
 
         Returns:
@@ -122,7 +122,6 @@ class Pipeline:
         beam_size: int,
         sequences: list[str],
         conditions: list[list[float]] | torch.Tensor,
-        device: torch.device | None = None,
         **kwargs,
     ) -> Iterable[str]:
         """Completes each conditioned input sequence, using the beam search strategy.
@@ -137,7 +136,6 @@ class Pipeline:
             beam_size: Beam size of first step.
             sequences: List of text sequences to complete.
             conditions: List of condition value lists per batch.
-            device: Torch device used for inference.
             **kwargs: Additional keyword arguments passed to Tokenizer.encode.
 
         Returns:
