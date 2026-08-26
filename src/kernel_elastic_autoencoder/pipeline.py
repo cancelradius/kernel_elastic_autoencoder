@@ -267,3 +267,28 @@ class Pipeline:
         grouped_ids = input_ids.view(top_probs.shape[0], beam_size, -1)
         winning_ids = grouped_ids[torch.arange(top_probs.size(0)), top_prob_inds]
         return self.tokenizer.decode(winning_ids, skip_special_tokens=True)
+
+    def encoding(
+        self, sequences: list[str], conditions: list[list[float]] | torch.Tensor
+    ) -> torch.Tensor:
+        input_ids = self.tokenizer.encode(
+            text=sequences,
+            padding="max_length",
+            max_length=self.model.config_typed.input.max_len,
+            add_special_tokens=True,
+            return_tensors="pt",
+        ).to(self.device)
+        conditions = torch.as_tensor(conditions, dtype=torch.float, device=self.device)
+        token_mask = (input_ids == self.model.config_typed.common.padding_idx).to(
+            dtype=torch.bool, device=self.device
+        )
+        condition_mask = (
+            conditions == self.model.config_typed.common.padding_value
+        ).to(dtype=torch.bool, device=self.device)
+
+        return self.model.encode(
+            input_ids=input_ids,
+            conditions=conditions,
+            token_mask=token_mask,
+            condition_mask=condition_mask,
+        )
