@@ -158,17 +158,25 @@ class Pipeline:
             return_tensors="pt",
             **kwargs,
         ).to(self.device)
-        input_probs = torch.zeros_like(input_ids * beam_size)
-        conditions = torch.as_tensor(conditions, dtype=torch.float, device=device)
-        condition_mask = (
-            (conditions != self.model.config_typed.common.padding_value)
-            .to(torch.bool)
-            .repeat_interleave(beam_size, dim=0)
+        input_ids = torch.cat(
+            [
+                torch.full(
+                    (input_ids.size(0), 1),
+                    self.tokenizer.bos_token_id,
+                    device=self.device,
+                ),
+                input_ids,
+            ],
+            dim=1,
         )
-        conds_embed = self.model.embed_conditions(conditions).repeat_interleave(
-            beam_size, dim=0
+        token_mask = (input_ids == self.tokenizer.pad_token_id).to(torch.bool)
+        latents = latents.to(self.device)
+        input_probs = torch.zeros_like(input_ids).repeat_interleave(beam_size, dim=0)
+        conditions = torch.as_tensor(conditions, dtype=torch.float, device=self.device)
+        conds_embed = self.model.embed_conditions(conditions)
+        batches_completed = torch.zeros(
+            input_ids.size(0) * beam_size, dtype=torch.bool, device=self.device
         )
-        batches_completed = torch.zeros(input_ids.size(0) * beam_size, dtype=torch.bool)
 
         logits = self.model.decode(
             current_output=input_ids,
@@ -178,15 +186,15 @@ class Pipeline:
         )
         new_toks = (
             torch.topk(logits[:, -1:], k=beam_size, dim=-1)
-            .indices.squeeze(-1)
+            .indices.flatten()
+            .unsqueeze(-1)
             .to(torch.long)
         )
         new_probs = (
             torch.topk(logits[:, -1:], k=beam_size, dim=-1)
-            .values.squeeze(-1)
-            .to(torch.long)
+            .values.flatten()
+            .unsqueeze(-1)
         )
-        batches_completed |= new_toks.squeeze(-1) == self.tokenizer.eos_token_id
         new_toks = torch.where(
             batches_completed.unsqueeze(-1),
             self.tokenizer.pad_token_id,
@@ -201,20 +209,21 @@ class Pipeline:
             [input_ids.repeat_interleave(beam_size, dim=0), new_toks], dim=1
         )
         input_probs = torch.cat([input_probs, new_probs], dim=1)
+        conds_embed = conds_embed.repeat_interleave(beam_size, dim=0)
+        latents = latents.repeat_interleave(beam_size, dim=0)
+        token_mask = token_mask.repeat_interleave(beam_size, dim=0)
+        batches_completed |= new_toks.squeeze(-1) == self.tokenizer.eos_token_id
+        token_mask = torch.cat(
+            [
+                token_mask,
+                torch.zeros(input_ids.size(0), 1, dtype=torch.bool, device=self.device),
+            ],
+            dim=1,
+        )
 
         while (input_ids.size(1) < self.model.config_typed.input.max_len) and (
             not batches_completed.all()
         ):
-            input_ids = torch.cat(
-                [
-                    torch.full(
-                        (input_ids.size(0), 1),
-                        self.tokenizer.bos_token_id,
-                    ),
-                    input_ids,
-                ],
-                dim=1,
-            )
             logits = self.model.decode(
                 current_output=input_ids,
                 latents=latents,
@@ -223,15 +232,13 @@ class Pipeline:
             )
             new_toks = (
                 torch.topk(logits[:, -1:], k=1, dim=-1)
-                .indices.squeeze(-1)
+                .indices.flatten()
+                .unsqueeze(-1)
                 .to(torch.long)
             )
             new_probs = (
-                torch.topk(logits[:, -1:], k=1, dim=-1)
-                .values.squeeze(-1)
-                .to(torch.long)
+                torch.topk(logits[:, -1:], k=1, dim=-1).values.flatten().unsqueeze(-1)
             )
-            batches_completed |= new_toks.squeeze(-1) == self.tokenizer.eos_token_id
             new_toks = torch.where(
                 batches_completed.unsqueeze(-1),
                 self.tokenizer.pad_token_id,
@@ -244,10 +251,19 @@ class Pipeline:
             )
             input_ids = torch.cat([input_ids, new_toks], dim=1)
             input_probs = torch.cat([input_probs, new_probs], dim=1)
+            token_mask = torch.cat(
+                [
+                    token_mask,
+                    torch.zeros(
+                        input_ids.size(0), 1, dtype=torch.bool, device=self.device
+                    ),
+                ],
+                dim=1,
+            )
+            batches_completed |= new_toks.squeeze(-1) == self.tokenizer.eos_token_id
 
         top_probs = input_probs.reshape(input_probs.size(0) // beam_size, beam_size, -1)
-        top_prob_inds = top_probs.sum(dim=-1).topk(k=1, dim=1).indices
-        winning_ids = torch.take_along_dim(
-            input_ids, top_prob_inds.unsqueeze(-1), 1
-        ).squeeze(1)
+        top_prob_inds = top_probs.sum(dim=-1).topk(k=1, dim=1).indices.squeeze(-1)
+        grouped_ids = input_ids.view(top_probs.shape[0], beam_size, -1)
+        winning_ids = grouped_ids[torch.arange(top_probs.size(0)), top_prob_inds]
         return self.tokenizer.decode(winning_ids, skip_special_tokens=True)
