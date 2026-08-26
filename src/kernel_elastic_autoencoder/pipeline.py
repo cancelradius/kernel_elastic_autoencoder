@@ -75,26 +75,28 @@ class Pipeline:
             return_tensors="pt",
             **kwargs,
         ).to(self.device)
-        conditions = torch.as_tensor(conditions, dtype=torch.float, device=device)
-        condition_mask = (
-            conditions != self.model.config_typed.common.padding_value
-        ).to(torch.bool)
+        input_ids = torch.cat(
+            [
+                torch.full(
+                    (input_ids.size(0), 1),
+                    self.tokenizer.bos_token_id,
+                    device=self.device,
+                ),
+                input_ids,
+            ],
+            dim=1,
+        )
+        latents = latents.to(self.device)
+        conditions = torch.as_tensor(conditions, dtype=torch.float, device=self.device)
         conds_embed = self.model.embed_conditions(conditions)
-        batches_completed = torch.zeros(input_ids.size(0), dtype=torch.bool)
+        token_mask = (input_ids == self.tokenizer.pad_token_id).to(torch.bool)
+        batches_completed = torch.zeros(
+            input_ids.size(0), dtype=torch.bool, device=self.device
+        )
 
         while (input_ids.size(1) < self.model.config_typed.input.max_len) and (
             not batches_completed.all()
         ):
-            input_ids = torch.cat(
-                [
-                    torch.full(
-                        (input_ids.size(0), 1),
-                        self.tokenizer.bos_token_id,
-                    ),
-                    input_ids,
-                ],
-                dim=1,
-            )
             logits = self.model.decode(
                 current_output=input_ids,
                 latents=latents,
@@ -113,6 +115,15 @@ class Pipeline:
                 new_toks,
             )
             input_ids = torch.cat([input_ids, new_toks], dim=1)
+            token_mask = torch.cat(
+                [
+                    token_mask,
+                    torch.zeros(
+                        input_ids.size(0), 1, dtype=torch.bool, device=self.device
+                    ),
+                ],
+                dim=1,
+            )
         return self.tokenizer.decode(input_ids, skip_special_tokens=True)
 
     def beam_completion(
