@@ -76,8 +76,8 @@ class Trainer:
             return_tensors="pt",
         )
         conditions = torch.as_tensor(conditions, dtype=torch.float)
-        token_mask = (input_ids != model.config_typed.common.padding_idx).to(torch.bool)
-        condition_mask = (conditions != model.config_typed.common.padding_value).to(
+        token_mask = (input_ids == model.config_typed.common.padding_idx).to(torch.bool)
+        condition_mask = (conditions == model.config_typed.common.padding_value).to(
             torch.bool
         )
 
