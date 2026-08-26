@@ -127,7 +127,8 @@ class Trainer:
                 )
                 accelerator.backward(loss)
                 optimizer.step()
-
+            print(f"Train loss: {float(loss.detach())}")
+            
             model.eval()
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_test, desc=f"Epoch {epoch}, Test Batch"
@@ -142,6 +143,7 @@ class Trainer:
                     loss = loss_fn(
                         prediction, prediction_noise, input_ids[:, 1:], latents_noise
                     )
+            print(f"Test loss: {float(loss.detach())}")
 
             scheduler.step()
 
