@@ -100,8 +100,7 @@ class Pipeline:
                 current_output=input_ids,
                 latents=latents,
                 condition_embeddings=conds_embed,
-                token_mask=None,
-                condition_mask=condition_mask,
+                token_mask=token_mask,
             )
             new_toks = (
                 torch.topk(logits[:, -1:], k=1, dim=-1)
@@ -168,8 +167,7 @@ class Pipeline:
             current_output=input_ids,
             latents=latents,
             condition_embeddings=conds_embed,
-            token_mask=None,
-            condition_mask=condition_mask,
+            token_mask=token_mask,
         )
         new_toks = (
             torch.topk(logits[:, -1:], k=beam_size, dim=-1)
@@ -214,8 +212,7 @@ class Pipeline:
                 current_output=input_ids,
                 latents=latents,
                 condition_embeddings=conds_embed,
-                token_mask=None,
-                condition_mask=condition_mask,
+                token_mask=token_mask,
             )
             new_toks = (
                 torch.topk(logits[:, -1:], k=1, dim=-1)
