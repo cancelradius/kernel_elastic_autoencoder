@@ -2,6 +2,63 @@
 
 <!-- version list -->
 
+## v3.2.0 (2026-08-26)
+
+### Bug Fixes
+
+- BOS and token masking
+  ([`8d81d36`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/8d81d36ac29ab3fd25874587d0cc214b2efcff5c))
+
+- Cast padding_mask to bool in the encoder to avoid deprecated mask type mismatch
+  ([`51ecfff`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/51ecfff8be1ef8862f23b1be9af5e3050a483038))
+
+- Correct padding sig
+  ([`0c46ec9`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/0c46ec99f4b160d401311a663defc53da5a195cb))
+
+- Correct padding_mask slicing
+  ([`281134d`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/281134dacafcc259ffe10230446aca27474e54a8))
+
+- Correctly sized causal mask buffer
+  ([`80eb4c4`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/80eb4c49d2f321506ab0516ebac3282e246ba8f5))
+
+- Dropout typing in config now accepts defaults
+  ([`07c2739`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/07c273981a5a10f6350b9a57903d1e5be1a74241))
+
+- Keep ground truth conversion to torch.long in WCEL
+  ([`62b8167`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/62b816757541a1fb990ac4ba04ee77dbf0a8e7ef))
+
+- Move masked condition indices to right device in ConditionEmbedding
+  ([`4105159`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/410515978e50ef9f4446b07b0a64df7ec08cf3cc))
+
+- Pad batches during inference
+  ([`dd883c4`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/dd883c47029602205985388ebbd4dcc9f83c1e5e))
+
+- Proper device fallbacks
+  ([`e56795f`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/e56795f042f23f4346ccce7916af6543ca081ba9))
+
+- Remove condition_mask in Model.decode
+  ([`c669147`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/c6691479d5b4513c61ddffef1abb763505822123))
+
+- Repair beam_completion behaviour
+  ([`82a2883`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/82a28834ee63cc27f2c2e8e571b6c0bdfe7e7932))
+
+### Chores
+
+- Minimal train logging
+  ([`8682734`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/868273462af8b4bc6d3ceac58c6d645488247b7e))
+
+- Prune imports in config.py
+  ([`f6eb33d`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/f6eb33d89d47ff0069037f9adbdb0692adc4a746))
+
+- Remove deprecated and superfluous epoch input to scheduler.step
+  ([`657550b`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/657550b48ca1373572295b059839a3b2a0eb1722))
+
+### Features
+
+- Add Pipeline.encoding
+  ([`57d42b6`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/57d42b6f22f13a69c2be1ad8b334613043990125))
+
+
 ## v3.1.2 (2026-08-25)
 
 ### Bug Fixes
