@@ -30,13 +30,9 @@ jobs:
         run: |
           git reset --hard ${{ github.sha }}
 
-      - name: Force install gitpython==3.1.59
-        run: |
-          pip install gitpython==3.1.59
-
       - name: Build and version release
         id: release
-        uses: python-semantic-release/python-semantic-release@v10.6.1
+        uses: cancelradius/psr-gitpython-pin@10.6.1-hotfix
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           git_committer_name: "github-actions"
