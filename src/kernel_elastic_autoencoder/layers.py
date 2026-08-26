@@ -205,7 +205,7 @@ class Decoder(nn.Module):
         self.out_linear = nn.Linear(embedding_dim, vocab_size)
 
         self.register_buffer(
-            "causal_mask", nn.Transformer.generate_square_subsequent_mask(max_len - 1).to(torch.bool)
+            "causal_mask", nn.Transformer.generate_square_subsequent_mask(max_len).to(torch.bool)
         )
 
     def forward(
