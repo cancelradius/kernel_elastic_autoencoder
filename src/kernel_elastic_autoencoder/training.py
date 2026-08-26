@@ -143,7 +143,7 @@ class Trainer:
                         prediction, prediction_noise, input_ids[:, 1:], latents_noise
                     )
 
-            scheduler.step(epoch)
+            scheduler.step()
 
             accelerator.wait_for_everyone()
             curr_epoch += 1
