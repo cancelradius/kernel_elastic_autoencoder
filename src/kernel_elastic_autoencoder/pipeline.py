@@ -70,8 +70,7 @@ class Pipeline:
         """
         input_ids = self.tokenizer.encode(
             text=sequences,
-            padding='do_not_pad',
-            max_length=self.model.config_typed.input.max_len,
+            padding="longest",
             add_special_tokens=False,
             return_tensors="pt",
             **kwargs,
@@ -143,8 +142,7 @@ class Pipeline:
         """
         input_ids = self.tokenizer.encode(
             text=sequences,
-            padding='do_not_pad',
-            max_length=self.model.config_typed.input.max_len,
+            padding="longest",
             add_special_tokens=False,
             return_tensors="pt",
             **kwargs,
