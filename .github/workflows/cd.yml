@@ -39,7 +39,7 @@ jobs:
           git_committer_email: "actions@users.noreply.github.com"
 
       - name: Upload tag to GitHub release assets
-        uses: python-semantic-release/publish-action@v10.6.1
+        uses: cancelradius/psr-publish-gitpython-pin@10.6.1-hotfix-r1
         if: steps.release.outputs.released == 'true'
         with:
           github_token: ${{ secrets.GH_TOKEN }}
