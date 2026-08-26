@@ -2,27 +2,6 @@
 
 <!-- version list -->
 
-## v3.1.3 (2026-08-26)
-
-### Bug Fixes
-
-- Standardize mismatched mask types in decoder
-  ([`d782502`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/d7825022afd7424eaf3b332d9b7dfbc219c9def5))
-
-### Build System
-
-- Force install gitpython==3.1.59 in CD to avoid breaking changes in 3.1.60
-  ([`43e2e77`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/43e2e771642c8492b37383de7eb02b40b735ea41))
-
-### Chores
-
-- **ci**: Bump PSR fork version to fix a mistake
-  ([`cd2c4b2`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/cd2c4b2c80f09e8ab24925e11297e819f0afad59))
-
-- **ci**: Use our forked PSR action
-  ([`6571c1a`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/6571c1a7b69b603f429c7e03684156daa1b6f83a))
-
-
 ## v3.1.2 (2026-08-25)
 
 ### Bug Fixes
