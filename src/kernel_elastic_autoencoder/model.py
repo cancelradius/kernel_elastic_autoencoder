@@ -108,13 +108,13 @@ class Model(
             input_ids[:, :-1],
             latents,
             condition_embeddings,
-            padding_mask[: self.config_typed.input.max_len - 1],
+            padding_mask[:, : self.config_typed.input.max_len - 1],
         )
         prediction_noise = self.decoder(
             input_ids[:, :-1],
             latents_noise,
             condition_embeddings,
-            padding_mask[: self.config_typed.input.max_len - 1],
+            padding_mask[:, : self.config_typed.input.max_len - 1],
         )
         return prediction, prediction_noise, latents_noise
 
