@@ -32,7 +32,7 @@ jobs:
 
       - name: Build and version release
         id: release
-        uses: cancelradius/psr-gitpython-pin@10.6.1-hotfix
+        uses: cancelradius/psr-gitpython-pin@10.6.1-hotfix-r1
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           git_committer_name: "github-actions"
