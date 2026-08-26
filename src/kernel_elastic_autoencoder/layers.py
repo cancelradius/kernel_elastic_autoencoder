@@ -31,7 +31,7 @@ class ConditionEmbedding(nn.Module):
 
     def forward(self, c: torch.Tensor):
         indices = self.indices.repeat(c.size(0), 1).to(c.device)  # type: ignore
-        masked_indices = indices.masked_fill(c == self.padding_value, 0)
+        masked_indices = indices.masked_fill(c == self.padding_value, 0).to(c.device)
         embedding = self.embedding(masked_indices)
         return embedding * c.unsqueeze(-1).repeat(1, 1, embedding.size(-1))
 
