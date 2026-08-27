@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.2.1 (2026-08-27)
+
+### Bug Fixes
+
+- Force --find_unused_parameters on any accelerate launch
+  ([`a48f2a1`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/a48f2a170b9471f519de3d0acbfbf2c699296f3f))
+
+
 ## v3.2.0 (2026-08-26)
 
 ### Bug Fixes
