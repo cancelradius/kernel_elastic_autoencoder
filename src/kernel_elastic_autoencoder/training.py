@@ -100,7 +100,7 @@ class Trainer:
         )
         curr_epoch = 0
 
-        model, optimizer, dataloader_train, dataloader_test, scheduler, curr_epoch = (
+        model, optimizer, dataloader_train, dataloader_test, scheduler, curr_epoch, loss_fn = (
             accelerator.prepare(
                 model,
                 optimizer,
@@ -108,6 +108,7 @@ class Trainer:
                 dataloader_test,
                 scheduler,
                 curr_epoch,
+                loss_fn,
             )
         )
         accelerator.register_for_checkpointing(scheduler)
