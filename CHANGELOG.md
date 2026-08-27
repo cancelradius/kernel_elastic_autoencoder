@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v3.2.4 (2026-08-27)
+
+### Bug Fixes
+
+- Add workers and pin memory for DataLoaders
+  ([`d88a9ab`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/d88a9ab450a55120667f5fe3ad13a995ea36c473))
+
+### Refactoring
+
+- Clean up tqdm boilerplate
+  ([`81d9a6c`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/81d9a6cdfe50f25c81152c93d7c65fc09c48e456))
+
+
 ## v3.2.3 (2026-08-27)
 
 ### Bug Fixes
