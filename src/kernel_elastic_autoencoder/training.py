@@ -92,10 +92,14 @@ class Trainer:
         dataloader_train = torch.utils.data.DataLoader(
             dataset_train,
             batch_size=self.config_typed.common.batch_size,
+            pin_memory=True,
+            num_workers=4,
         )
         dataloader_test = torch.utils.data.DataLoader(
             dataset_test,
             batch_size=self.config_typed.common.batch_size,
+            pin_memory=True,
+            num_workers=4,
         )
         curr_epoch = 0
 
