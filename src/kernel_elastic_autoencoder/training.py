@@ -118,11 +118,9 @@ class Trainer:
         accelerator.wait_for_everyone()
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
             model.train()
-            if accelerator.is_local_main_process:
-                batch_bar = tqdm(
-                    total=len(dataloader_train), desc=f"Epoch {epoch}, Train Batch"
-                )
-            for input_ids, conditions, token_mask, condition_mask in dataloader_train:
+            for input_ids, conditions, token_mask, condition_mask in tqdm(
+                dataloader_train, desc=f"Epoch {epoch}, Train Batch"
+            ):
                 optimizer.zero_grad()
                 prediction, prediction_noise, latents_noise = model(
                     input_ids, conditions, token_mask, condition_mask
@@ -132,16 +130,12 @@ class Trainer:
                 )
                 accelerator.backward(loss)
                 optimizer.step()
-                if accelerator.is_local_main_process:
-                    batch_bar.update(1)
             accelerator.print(f"Train loss: {float(loss.detach())}")
 
             model.eval()
-            if accelerator.is_local_main_process:
-                batch_bar = tqdm(
-                    total=len(dataloader_train), desc=f"Epoch {epoch}, Test Batch"
-                )
-            for input_ids, conditions, token_mask, condition_mask in dataloader_test:
+            for input_ids, conditions, token_mask, condition_mask in tqdm(
+                dataloader_test, desc=f"Epoch {epoch}, Test Batch"
+            ):
                 with torch.no_grad():
                     prediction, prediction_noise, latents_noise = model(
                         input_ids,
@@ -152,8 +146,6 @@ class Trainer:
                     loss = loss_fn(
                         prediction, prediction_noise, input_ids[:, 1:], latents_noise
                     )
-                    if accelerator.is_local_main_process:
-                        batch_bar.update(1)
             accelerator.print(f"Test loss: {float(loss.detach())}")
 
             scheduler.step()
