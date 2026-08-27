@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v3.2.5 (2026-08-27)
+
+### Bug Fixes
+
+- Change erroneous hp_sigma default
+  ([`d6546a6`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/d6546a6939bda5cd84f901ec3d6cea48ce8e8fec))
+
+- Fix seed for random_split in training
+  ([`99ed9b5`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/99ed9b51b04b2097b27a412e3a3f90d83786e458))
+
+- **perf**: Move loss_fn with Accelerator.prepare
+  ([`3e2476d`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/3e2476d60ae840a0d724a48cb4d093e930841635))
+
+
 ## v3.2.4 (2026-08-27)
 
 ### Bug Fixes
