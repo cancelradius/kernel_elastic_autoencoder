@@ -86,8 +86,9 @@ class Trainer:
         dataset = torch.utils.data.TensorDataset(
             input_ids, conditions, token_mask, condition_mask
         )
+        gen = torch.Generator().manual_seed(0)
         dataset_train, dataset_test = torch.utils.data.random_split(
-            dataset, [train_split, 1 - train_split]
+            dataset, [train_split, 1 - train_split], generator=gen
         )
         dataloader_train = torch.utils.data.DataLoader(
             dataset_train,
