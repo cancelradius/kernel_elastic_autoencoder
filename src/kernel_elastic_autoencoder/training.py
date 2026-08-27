@@ -115,6 +115,7 @@ class Trainer:
             accelerator.load_state(checkpoint)
             curr_epoch = scheduler.scheduler.last_epoch + 1
 
+        accelerator.wait_for_everyone()
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
             model.train()
             if accelerator.is_local_main_process:
@@ -140,9 +141,7 @@ class Trainer:
                 batch_bar = tqdm(
                     total=len(dataloader_train), desc=f"Epoch {epoch}, Test Batch"
                 )
-            for input_ids, conditions, token_mask, condition_mask in tqdm(
-                dataloader_test, desc=f"Epoch {epoch}, Test Batch"
-            ):
+            for input_ids, conditions, token_mask, condition_mask in dataloader_test:
                 with torch.no_grad():
                     prediction, prediction_noise, latents_noise = model(
                         input_ids,
