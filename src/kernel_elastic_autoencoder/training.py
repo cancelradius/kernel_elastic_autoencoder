@@ -3,13 +3,12 @@ from collections.abc import Iterable
 
 import torch
 from accelerate import Accelerator
-from accelerate.utils import tqdm
+from accelerate.utils import DistributedDataParallelKwargs, tqdm
 
 from kernel_elastic_autoencoder.config import TrainingConfig
 from kernel_elastic_autoencoder.losses import Loss
 from kernel_elastic_autoencoder.model import Model
 from kernel_elastic_autoencoder.tokenizer import Tokenizer
-from accelerate.utils import DistributedDataParallelKwargs
 
 
 class Trainer:
@@ -118,9 +117,11 @@ class Trainer:
 
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
             model.train()
-            for input_ids, conditions, token_mask, condition_mask in tqdm(
-                dataloader_train, desc=f"Epoch {epoch}, Train Batch"
-            ):
+            if accelerator.is_local_main_process:
+                batch_bar = tqdm(
+                    total=len(dataloader_train), desc=f"Epoch {epoch}, Train Batch"
+                )
+            for input_ids, conditions, token_mask, condition_mask in dataloader_train:
                 optimizer.zero_grad()
                 prediction, prediction_noise, latents_noise = model(
                     input_ids, conditions, token_mask, condition_mask
@@ -130,9 +131,15 @@ class Trainer:
                 )
                 accelerator.backward(loss)
                 optimizer.step()
-            print(f"Train loss: {float(loss.detach())}")
+                if accelerator.is_local_main_process:
+                    batch_bar.update(1)
+            accelerator.print(f"Train loss: {float(loss.detach())}")
 
             model.eval()
+            if accelerator.is_local_main_process:
+                batch_bar = tqdm(
+                    total=len(dataloader_train), desc=f"Epoch {epoch}, Test Batch"
+                )
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_test, desc=f"Epoch {epoch}, Test Batch"
             ):
@@ -146,15 +153,20 @@ class Trainer:
                     loss = loss_fn(
                         prediction, prediction_noise, input_ids[:, 1:], latents_noise
                     )
-            print(f"Test loss: {float(loss.detach())}")
+                    if accelerator.is_local_main_process:
+                        batch_bar.update(1)
+            accelerator.print(f"Test loss: {float(loss.detach())}")
 
             scheduler.step()
 
-            accelerator.wait_for_everyone()
             curr_epoch += 1
-            os.makedirs(os.path.join(checkpoint, "dist/"), exist_ok=True)
-            model.save_pretrained(os.path.join(checkpoint, "dist/"))
-            self.config_typed.to_json(
-                os.path.join(checkpoint, "dist/train_config.json")
-            )
+            accelerator.wait_for_everyone()
             accelerator.save_state(checkpoint)
+            if accelerator.is_main_process:
+                os.makedirs(os.path.join(checkpoint, "dist/"), exist_ok=True)
+                accelerator.unwrap_model(model).save_pretrained(
+                    os.path.join(checkpoint, "dist/")
+                )
+                self.config_typed.to_json(
+                    os.path.join(checkpoint, "dist/train_config.json")
+                )
