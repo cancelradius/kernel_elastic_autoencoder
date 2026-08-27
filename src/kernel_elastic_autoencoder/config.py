@@ -197,7 +197,7 @@ class TrainingHyperparameterConfig(Config):
         r"vanilla-AE and VAE objectives in the reconstruction loss.",
     )
     hp_sigma: float = Field(
-        default=math.sqrt(32),
+        default=math.sqrt(0.32),
         description=r"Hyperparameter $\sigma$, as used in the Kernel function applied in m-MMD loss. Roughly, "
         r"used as a scaling factor to control the sizes of gradients produced by the m-MMD loss.",
     )
