@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.2.3 (2026-08-27)
+
+### Bug Fixes
+
+- Wait for everyone before starting training
+  ([`7ba25da`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/7ba25da42ab74a4da65eadbd2928343929ee736c))
+
+
 ## v3.2.2 (2026-08-27)
 
 ### Bug Fixes
