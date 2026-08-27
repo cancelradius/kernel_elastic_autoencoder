@@ -9,6 +9,7 @@ from kernel_elastic_autoencoder.config import TrainingConfig
 from kernel_elastic_autoencoder.losses import Loss
 from kernel_elastic_autoencoder.model import Model
 from kernel_elastic_autoencoder.tokenizer import Tokenizer
+from accelerate.utils import DistributedDataParallelKwargs
 
 
 class Trainer:
@@ -50,7 +51,9 @@ class Trainer:
             train_split: Fraction of dataset used for training. Must be between 0 and 1.
             checkpoint: Path of local checkpoint to be saved and/or resumed.
         """
-        accelerator = Accelerator()
+        accelerator = Accelerator(
+            kwargs_handlers=[DistributedDataParallelKwargs(find_unused_parameters=True)]
+        )
 
         loss_fn = Loss(
             hp_lambda=self.config_typed.hyperparameters.hp_lambda,
@@ -128,7 +131,7 @@ class Trainer:
                 accelerator.backward(loss)
                 optimizer.step()
             print(f"Train loss: {float(loss.detach())}")
-            
+
             model.eval()
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_test, desc=f"Epoch {epoch}, Test Batch"
