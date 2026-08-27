@@ -52,7 +52,7 @@ def kae_loss():
     def _factory(
         hp_lambda=3.5,
         hp_delta=1.0,
-        hp_sigma=math.sqrt(32),
+        hp_sigma=math.sqrt(0.32),
         kernel_dist_size=1000,
         padding_idx=0,
         embedding_dim=128,
