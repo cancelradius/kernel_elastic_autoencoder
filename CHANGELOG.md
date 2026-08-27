@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.2.2 (2026-08-27)
+
+### Bug Fixes
+
+- Logging respects main process
+  ([`31977b3`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/31977b37f14147bba5e0a63a63716035311b4217))
+
+
 ## v3.2.1 (2026-08-27)
 
 ### Bug Fixes
