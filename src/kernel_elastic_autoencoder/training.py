@@ -136,7 +136,7 @@ class Trainer:
                 )
                 accelerator.backward(loss)
                 optimizer.step()
-                torch.cat([train_loss, loss.detach()], dim=0)
+                torch.cat([train_loss, loss.detach().unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. train loss: {train_loss.mean().item()}")
 
             model.eval()
@@ -154,7 +154,7 @@ class Trainer:
                     loss = loss_fn(
                         prediction, prediction_noise, input_ids[:, 1:], latents_noise
                     )
-                    torch.cat([test_loss, loss.detach()], dim=0)
+                    torch.cat([test_loss, loss.detach().unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. test loss: {test_loss.mean().item()}")
 
             scheduler.step()
