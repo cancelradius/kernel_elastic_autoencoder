@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.3.4 (2026-08-28)
+
+### Bug Fixes
+
+- Feed clean, not noisy latents to divergence loss
+  ([`cf5a659`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/cf5a659fa77f366a3321b89f83699a7bce27901e))
+
+
 ## v3.3.3 (2026-08-28)
 
 ### Bug Fixes
