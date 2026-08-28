@@ -104,14 +104,13 @@ class Trainer:
         )
         curr_epoch = 0
 
-        model, optimizer, dataloader_train, dataloader_test, scheduler, curr_epoch, loss_fn = (
+        model, optimizer, dataloader_train, dataloader_test, scheduler, loss_fn = (
             accelerator.prepare(
                 model,
                 optimizer,
                 dataloader_train,
                 dataloader_test,
                 scheduler,
-                curr_epoch,
                 loss_fn,
             )
         )
@@ -124,6 +123,7 @@ class Trainer:
         accelerator.wait_for_everyone()
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
             model.train()
+            train_loss = torch.tensor([])
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_train, desc=f"Epoch {epoch}, Train Batch"
             ):
@@ -136,9 +136,11 @@ class Trainer:
                 )
                 accelerator.backward(loss)
                 optimizer.step()
-            accelerator.print(f"Train loss: {float(loss.detach())}")
+                torch.cat([train_loss, loss.detach()], dim=0)
+            accelerator.print(f"Avg. train loss: {train_loss.mean().item()}")
 
             model.eval()
+            test_loss = torch.tensor([])
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_test, desc=f"Epoch {epoch}, Test Batch"
             ):
@@ -152,7 +154,8 @@ class Trainer:
                     loss = loss_fn(
                         prediction, prediction_noise, input_ids[:, 1:], latents_noise
                     )
-            accelerator.print(f"Test loss: {float(loss.detach())}")
+                    torch.cat([test_loss, loss.detach()], dim=0)
+            accelerator.print(f"Avg. test loss: {test_loss.mean().item()}")
 
             scheduler.step()
 
