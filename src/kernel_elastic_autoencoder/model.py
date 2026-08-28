@@ -116,7 +116,7 @@ class Model(
             condition_embeddings,
             padding_mask[:, : self.config_typed.input.max_len - 1],
         )
-        return prediction, prediction_noise, latents_noise
+        return prediction, prediction_noise, latents
 
     def encode(
         self,
