@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.3.2 (2026-08-28)
+
+### Bug Fixes
+
+- Unsqueeze loss tensors before torch.cat to logging tensor
+  ([`f9b7bc1`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/f9b7bc1b1caf891bbe10899dcc7b7795fc98ac59))
+
+
 ## v3.3.1 (2026-08-28)
 
 ### Bug Fixes
