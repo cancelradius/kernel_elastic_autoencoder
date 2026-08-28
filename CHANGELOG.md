@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.3.0 (2026-08-28)
+
+### Features
+
+- Log average losses per epoch
+  ([`a08c99e`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/a08c99e670c5956d7639ca510fd2f6b93595b72f))
+
+
 ## v3.2.5 (2026-08-27)
 
 ### Bug Fixes
