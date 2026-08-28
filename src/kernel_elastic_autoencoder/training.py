@@ -128,11 +128,11 @@ class Trainer:
                 dataloader_train, desc=f"Epoch {epoch}, Train Batch"
             ):
                 optimizer.zero_grad()
-                prediction, prediction_noise, latents_noise = model(
+                prediction, prediction_noise, latents = model(
                     input_ids, conditions, token_mask, condition_mask
                 )
                 loss = loss_fn(
-                    prediction, prediction_noise, input_ids[:, 1:], latents_noise
+                    prediction, prediction_noise, input_ids[:, 1:], latents
                 )
                 accelerator.backward(loss)
                 optimizer.step()
@@ -145,14 +145,14 @@ class Trainer:
                 dataloader_test, desc=f"Epoch {epoch}, Test Batch"
             ):
                 with torch.no_grad():
-                    prediction, prediction_noise, latents_noise = model(
+                    prediction, prediction_noise, latents = model(
                         input_ids,
                         conditions,
                         token_mask,
                         condition_mask,
                     )
                     loss = loss_fn(
-                        prediction, prediction_noise, input_ids[:, 1:], latents_noise
+                        prediction, prediction_noise, input_ids[:, 1:], latents
                     )
                     test_loss = torch.cat([test_loss, loss.detach().unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. test loss: {test_loss.mean().item()}")
