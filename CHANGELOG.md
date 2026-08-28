@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.3.3 (2026-08-28)
+
+### Bug Fixes
+
+- Correctly update loss logging tensors
+  ([`2cb6579`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/2cb6579722831a314749380182d8aaa838512bf7))
+
+
 ## v3.3.2 (2026-08-28)
 
 ### Bug Fixes
