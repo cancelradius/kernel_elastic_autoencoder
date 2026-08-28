@@ -94,13 +94,13 @@ class Trainer:
             dataset_train,
             batch_size=self.config_typed.common.batch_size,
             pin_memory=True,
-            num_workers=4,
+            num_workers=0,
         )
         dataloader_test = torch.utils.data.DataLoader(
             dataset_test,
             batch_size=self.config_typed.common.batch_size,
             pin_memory=True,
-            num_workers=4,
+            num_workers=0,
         )
         curr_epoch = 0
 
@@ -136,7 +136,7 @@ class Trainer:
                 )
                 accelerator.backward(loss)
                 optimizer.step()
-                torch.cat([train_loss, loss.detach().unsqueeze(-1)], dim=0)
+                train_loss = torch.cat([train_loss, loss.detach().unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. train loss: {train_loss.mean().item()}")
 
             model.eval()
@@ -154,7 +154,7 @@ class Trainer:
                     loss = loss_fn(
                         prediction, prediction_noise, input_ids[:, 1:], latents_noise
                     )
-                    torch.cat([test_loss, loss.detach().unsqueeze(-1)], dim=0)
+                    test_loss = torch.cat([test_loss, loss.detach().unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. test loss: {test_loss.mean().item()}")
 
             scheduler.step()
