@@ -123,7 +123,7 @@ class Trainer:
         accelerator.wait_for_everyone()
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
             model.train()
-            train_loss = torch.tensor([])
+            train_loss = torch.tensor([], device=accelerator.device)
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_train, desc=f"Epoch {epoch}, Train Batch"
             ):
@@ -140,7 +140,7 @@ class Trainer:
             accelerator.print(f"Avg. train loss: {train_loss.mean().item()}")
 
             model.eval()
-            test_loss = torch.tensor([])
+            test_loss = torch.tensor([], device=accelerator.device)
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_test, desc=f"Epoch {epoch}, Test Batch"
             ):
