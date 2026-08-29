@@ -58,7 +58,7 @@ class ModelInputConfig(Config):
         description="Vocabulary size of tokenizer. Should be fetched with Tokenizer.vocab_size as specified in the "
         "Tokenizer Protocol.",
     )
-    condition_channels: PositiveInt = Field(
+    condition_channels: NonNegativeInt = Field(
         default=2,
         description="Number of condition channels, should correspond to number of numerical columns in your "
         "dataset/inputs.",
