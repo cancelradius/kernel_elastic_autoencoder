@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.3.5 (2026-08-29)
+
+### Bug Fixes
+
+- **config**: Allow zero condition channels
+  ([`693a130`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/693a1302f97d0260ded5a033c93b92fccac65f71))
+
+
 ## v3.3.4 (2026-08-28)
 
 ### Bug Fixes
