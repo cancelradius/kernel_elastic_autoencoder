@@ -1,5 +1,6 @@
 import os
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
+from typing import Any
 
 import torch
 from accelerate import Accelerator
@@ -37,6 +38,7 @@ class Trainer:
         conditions: Iterable[Iterable[float]] | torch.Tensor,
         train_split: float = 0.9,
         checkpoint: str = "./checkpoint",
+        epoch_callback: Callable[[dict[str, Any]], Any] = lambda _: None,
     ):
         """Trains a model. Optionally, resumes from an existing checkpoint.
 
@@ -49,6 +51,7 @@ class Trainer:
             conditions: Iterable of iterables of condition values per sequence.
             train_split: Fraction of dataset used for training. Must be between 0 and 1.
             checkpoint: Path of local checkpoint to be saved and/or resumed.
+            epoch_callback: Callback function accepting a dict of per-epoch stats.
         """
         accelerator = Accelerator(
             kwargs_handlers=[DistributedDataParallelKwargs(find_unused_parameters=True)]
@@ -124,8 +127,17 @@ class Trainer:
 
         accelerator.wait_for_everyone()
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
+            cb_ctx = {
+                "epoch": epoch,
+                "train_loss": None,
+                "test_loss": None,
+                "dist_mean": None,
+                "dist_var": None,
+                "grad_norm": None,
+            }
             model.train()
             train_loss = torch.tensor([], device=accelerator.device)
+            grad_norm = torch.tensor([], device=accelerator.device)
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_train, desc=f"Epoch {epoch}, Train Batch"
             ):
@@ -133,16 +145,21 @@ class Trainer:
                 prediction, prediction_noise, latents = model(
                     input_ids, conditions, token_mask, condition_mask
                 )
-                loss = loss_fn(
-                    prediction, prediction_noise, input_ids[:, 1:], latents
-                )
+                loss = loss_fn(prediction, prediction_noise, input_ids[:, 1:], latents)
                 accelerator.backward(loss)
+                grad_norm_batch = torch.nn.utils.get_total_norm(model.parameters()).mean()
                 optimizer.step()
                 train_loss = torch.cat([train_loss, loss.detach().unsqueeze(-1)], dim=0)
+                grad_norm = torch.cat([grad_norm, grad_norm_batch.unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. train loss: {train_loss.mean().item()}")
+            cb_ctx["train_loss"] = train_loss.mean().item()
+            cb_ctx["grad_norm"] = grad_norm.mean().item()
 
             model.eval()
             test_loss = torch.tensor([], device=accelerator.device)
+
+            dist_mean = torch.tensor([], device=accelerator.device)
+            dist_var = torch.tensor([], device=accelerator.device)
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_test, desc=f"Epoch {epoch}, Test Batch"
             ):
@@ -156,8 +173,20 @@ class Trainer:
                     loss = loss_fn(
                         prediction, prediction_noise, input_ids[:, 1:], latents
                     )
-                    test_loss = torch.cat([test_loss, loss.detach().unsqueeze(-1)], dim=0)
+                    mean = latents.mean().mean()
+                    var = latents.var(dim=0).mean()
+                    test_loss = torch.cat(
+                        [test_loss, loss.detach().unsqueeze(-1)], dim=0
+                    )
+                    dist_mean = torch.cat(
+                        [dist_mean, mean.detach().unsqueeze(-1)], dim=0
+                    )
+                    dist_var = torch.cat([dist_var, var.detach().unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. test loss: {test_loss.mean().item()}")
+
+            cb_ctx["train_loss"] = test_loss.mean().item()
+            cb_ctx["dist_mean"] = dist_mean.mean().item()
+            cb_ctx["dist_var"] = dist_var.mean().item()
 
             scheduler.step()
 
@@ -165,6 +194,7 @@ class Trainer:
             accelerator.wait_for_everyone()
             accelerator.save_state(checkpoint)
             if accelerator.is_main_process:
+                epoch_callback(cb_ctx)
                 os.makedirs(os.path.join(checkpoint, "dist/"), exist_ok=True)
                 accelerator.unwrap_model(model).save_pretrained(
                     os.path.join(checkpoint, "dist/")
