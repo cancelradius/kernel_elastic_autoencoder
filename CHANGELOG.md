@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v3.3.6 (2026-08-30)
+
+### Bug Fixes
+
+- **inference**: Proper beam search algorithm
+  ([`1eb0627`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/1eb062759bc84a9b3a22f973d2eab7be1c6dbd34))
+
+- **training**: Shuffle dataloaders
+  ([`ff40989`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/ff40989636f4c930f2617ae389945bdb65b1f013))
+
+
 ## v3.3.5 (2026-08-29)
 
 ### Bug Fixes
