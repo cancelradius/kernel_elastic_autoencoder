@@ -108,7 +108,7 @@ class Pipeline:
                 .indices.squeeze(-1)
                 .to(torch.long)
             )
-            batches_completed |= new_toks.squeeze(-1) == self.tokenizer.eos_token_id
+            batches_completed |= new_toks.flatten() == self.tokenizer.eos_token_id
             new_toks = torch.where(
                 batches_completed.unsqueeze(-1),
                 self.tokenizer.pad_token_id,
@@ -118,9 +118,7 @@ class Pipeline:
             token_mask = torch.cat(
                 [
                     token_mask,
-                    torch.zeros(
-                        input_ids.size(0), 1, dtype=torch.bool, device=self.device
-                    ),
+                    batches_completed.unsqueeze(-1),
                 ],
                 dim=1,
             )
@@ -136,10 +134,9 @@ class Pipeline:
     ) -> Iterable[str]:
         """Completes each conditioned input sequence, using the beam search strategy.
 
-        The model completes each sequence in the provided list using decoder-only inference. On the
-        first step, the top `beam_size` first tokens are chosen for each batch. Subsequent tokens are
-        sampled greedily in parallel for every subsequence. Before returning output, the subsequence with
-        the highest sum of token logits is chosen for each batch.
+        The model completes each sequence in the provided list using decoder-only inference. The beam search
+        decoding algorithm is used. On the last step, instead of returning beam_size candidates per batch, the
+        candidate with the highest length-normalized sum of log odds is selected for each batch.
 
         Args:
             latents: Tensor of dimension (B, P * E) containing latent vectors for the batch.
@@ -212,11 +209,11 @@ class Pipeline:
         conds_embed = conds_embed.repeat_interleave(beam_size, dim=0)
         latents = latents.repeat_interleave(beam_size, dim=0)
         token_mask = token_mask.repeat_interleave(beam_size, dim=0)
-        batches_completed |= new_toks.squeeze(-1) == self.tokenizer.eos_token_id
+        batches_completed |= new_toks.flatten() == self.tokenizer.eos_token_id
         token_mask = torch.cat(
             [
                 token_mask,
-                torch.zeros(input_ids.size(0), 1, dtype=torch.bool, device=self.device),
+                batches_completed.unsqueeze(-1),
             ],
             dim=1,
         )
@@ -230,41 +227,81 @@ class Pipeline:
                 condition_embeddings=conds_embed,
                 token_mask=token_mask,
             )
+            odds = logits.log_softmax(dim=-1)
             new_toks = (
-                torch.topk(logits[:, -1:], k=1, dim=-1)
+                torch.topk(odds[:, -1:], k=beam_size, dim=-1)
                 .indices.flatten()
                 .unsqueeze(-1)
                 .to(torch.long)
             )
             new_probs = (
-                torch.topk(logits[:, -1:], k=1, dim=-1).values.flatten().unsqueeze(-1)
+                torch.topk(odds[:, -1:], k=beam_size, dim=-1)
+                .values.flatten()
+                .unsqueeze(-1)
             )
             new_toks = torch.where(
-                batches_completed.unsqueeze(-1),
+                batches_completed.repeat_interleave(beam_size, dim=0).unsqueeze(-1),
                 self.tokenizer.pad_token_id,
                 new_toks,
             )
             new_probs = torch.where(
-                batches_completed.unsqueeze(-1),
+                batches_completed.repeat_interleave(beam_size, dim=0).unsqueeze(-1),
                 0.0,
                 new_probs,
             )
-            input_ids = torch.cat([input_ids, new_toks], dim=1)
-            input_probs = torch.cat([input_probs, new_probs], dim=1)
+
+            candidate_ids = torch.cat(
+                [input_ids.repeat_interleave(beam_size, dim=0), new_toks], dim=1
+            )
+            candidate_probs = torch.cat(
+                [input_probs.repeat_interleave(beam_size, dim=0), new_probs], dim=1
+            )
+            top_probs = candidate_probs.view(
+                candidate_probs.size(0) // (beam_size**2), beam_size**2, -1
+            )
+            grouped_ids = candidate_ids.view(top_probs.size(0), top_probs.size(1), -1)
+            top_prob_inds = (
+                (
+                    top_probs.sum(dim=-1)
+                    * (grouped_ids != self.tokenizer.eos_token_id)
+                    .to(torch.long)
+                    .sum(dim=-1)
+                )
+                .topk(k=beam_size, dim=1)
+                .indices.squeeze(-1)
+            )
+            input_ids = grouped_ids[
+                torch.arange(top_probs.size(0)).unsqueeze(-1).repeat(1, beam_size),
+                top_prob_inds,
+            ].view(input_ids.size(0), -1)
+            input_probs = top_probs[
+                torch.arange(top_probs.size(0)).unsqueeze(-1).repeat(1, beam_size),
+                top_prob_inds,
+            ].view(input_ids.size(0), -1)
+
+            batches_completed |= (
+                input_ids[:, -1:].flatten() == self.tokenizer.eos_token_id
+            )
             token_mask = torch.cat(
                 [
                     token_mask,
-                    torch.zeros(
-                        input_ids.size(0), 1, dtype=torch.bool, device=self.device
-                    ),
+                    batches_completed.unsqueeze(-1),
                 ],
                 dim=1,
             )
-            batches_completed |= new_toks.squeeze(-1) == self.tokenizer.eos_token_id
 
         top_probs = input_probs.reshape(input_probs.size(0) // beam_size, beam_size, -1)
-        top_prob_inds = top_probs.sum(dim=-1).topk(k=1, dim=1).indices.squeeze(-1)
         grouped_ids = input_ids.view(top_probs.shape[0], beam_size, -1)
+        top_prob_inds = (
+            (
+                top_probs.sum(dim=-1)
+                * (grouped_ids != self.tokenizer.eos_token_id)
+                .to(torch.long)
+                .sum(dim=-1)
+            )
+            .topk(k=1, dim=1)
+            .indices.squeeze(-1)
+        )
         winning_ids = grouped_ids[torch.arange(top_probs.size(0)), top_prob_inds]
         return self.tokenizer.decode(winning_ids, skip_special_tokens=True)
 
