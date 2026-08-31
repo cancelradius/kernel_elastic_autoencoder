@@ -127,7 +127,7 @@ class Trainer:
 
         accelerator.wait_for_everyone()
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
-            if accelerator.is_main_process():
+            if accelerator.is_main_process:
                 cb_ctx = {
                     "epoch": epoch,
                     "train_loss": None,
@@ -151,7 +151,7 @@ class Trainer:
                 optimizer.step()
                 train_loss = torch.cat([train_loss, loss.detach().unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. train loss: {train_loss.mean().item()}")
-            if accelerator.is_main_process():
+            if accelerator.is_main_process:
                 cb_ctx["train_loss"] = train_loss.mean().item()
 
             model.eval()
