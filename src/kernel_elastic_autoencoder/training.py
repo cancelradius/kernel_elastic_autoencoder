@@ -1,3 +1,4 @@
+import json
 import os
 from collections.abc import Callable, Iterable
 from typing import Any
@@ -194,8 +195,10 @@ class Trainer:
             accelerator.wait_for_everyone()
             accelerator.save_state(checkpoint)
             if accelerator.is_main_process:
-                epoch_callback(cb_ctx)
                 os.makedirs(os.path.join(checkpoint, "dist/"), exist_ok=True)
+                with open("log.json", "w") as f:
+                    json.dump(cb_ctx, f, indent=4)
+                    epoch_callback(cb_ctx)
                 accelerator.unwrap_model(model).save_pretrained(
                     os.path.join(checkpoint, "dist/")
                 )
