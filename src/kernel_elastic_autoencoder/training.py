@@ -127,17 +127,16 @@ class Trainer:
 
         accelerator.wait_for_everyone()
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
-            cb_ctx = {
-                "epoch": epoch,
-                "train_loss": None,
-                "test_loss": None,
-                "dist_mean": None,
-                "dist_var": None,
-                "grad_norm": None,
-            }
+            if accelerator.is_main_process():
+                cb_ctx = {
+                    "epoch": epoch,
+                    "train_loss": None,
+                    "test_loss": None,
+                    "dist_mean": None,
+                    "dist_var": None,
+                }
             model.train()
             train_loss = torch.tensor([], device=accelerator.device)
-            grad_norm = torch.tensor([], device=accelerator.device)
             for input_ids, conditions, token_mask, condition_mask in tqdm(
                 dataloader_train, desc=f"Epoch {epoch}, Train Batch"
             ):
@@ -148,13 +147,12 @@ class Trainer:
                 loss = loss_fn(prediction, prediction_noise, input_ids[:, 1:], latents)
                 accelerator.backward(loss)
                 if accelerator.sync_gradients:
-                    grad_norm_batch = accelerator.clip_grad_norm_(model.parameters(), 1.0)
+                    accelerator.clip_grad_norm_(model.parameters(), 1.0)
                 optimizer.step()
                 train_loss = torch.cat([train_loss, loss.detach().unsqueeze(-1)], dim=0)
-                grad_norm = torch.cat([grad_norm, grad_norm_batch.unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. train loss: {train_loss.mean().item()}")
-            cb_ctx["train_loss"] = train_loss.mean().item()
-            cb_ctx["grad_norm"] = grad_norm.mean().item()
+            if accelerator.is_main_process():
+                cb_ctx["train_loss"] = train_loss.mean().item()
 
             model.eval()
             test_loss = torch.tensor([], device=accelerator.device)
@@ -185,9 +183,10 @@ class Trainer:
                     dist_var = torch.cat([dist_var, var.detach().unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. test loss: {test_loss.mean().item()}")
 
-            cb_ctx["test_loss"] = test_loss.mean().item()
-            cb_ctx["dist_mean"] = dist_mean.mean().item()
-            cb_ctx["dist_var"] = dist_var.mean().item()
+            if accelerator.is_main_process:
+                cb_ctx["test_loss"] = test_loss.mean().item()
+                cb_ctx["dist_mean"] = dist_mean.mean().item()
+                cb_ctx["dist_var"] = dist_var.mean().item()
 
             scheduler.step()
 
