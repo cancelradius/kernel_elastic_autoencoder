@@ -184,7 +184,7 @@ class Trainer:
                     dist_var = torch.cat([dist_var, var.detach().unsqueeze(-1)], dim=0)
             accelerator.print(f"Avg. test loss: {test_loss.mean().item()}")
 
-            cb_ctx["train_loss"] = test_loss.mean().item()
+            cb_ctx["test_loss"] = test_loss.mean().item()
             cb_ctx["dist_mean"] = dist_mean.mean().item()
             cb_ctx["dist_var"] = dist_var.mean().item()
 
