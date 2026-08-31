@@ -147,7 +147,8 @@ class Trainer:
                 )
                 loss = loss_fn(prediction, prediction_noise, input_ids[:, 1:], latents)
                 accelerator.backward(loss)
-                grad_norm_batch = torch.nn.utils.get_total_norm(model.parameters()).mean()
+                if accelerator.sync_gradients:
+                    grad_norm_batch = accelerator.clip_grad_norm_(model.parameters(), 1.0)
                 optimizer.step()
                 train_loss = torch.cat([train_loss, loss.detach().unsqueeze(-1)], dim=0)
                 grad_norm = torch.cat([grad_norm, grad_norm_batch.unsqueeze(-1)], dim=0)
