@@ -127,6 +127,7 @@ class Trainer:
             curr_epoch = scheduler.scheduler.last_epoch + 1
 
         accelerator.wait_for_everyone()
+        all_contexts = []
         for epoch in range(curr_epoch, self.config_typed.common.max_epochs):
             if accelerator.is_main_process:
                 cb_ctx = {
@@ -196,9 +197,10 @@ class Trainer:
             accelerator.save_state(checkpoint)
             if accelerator.is_main_process:
                 os.makedirs(os.path.join(checkpoint, "dist/"), exist_ok=True)
+                all_contexts.append(cb_ctx)
                 with open("log.json", "w") as f:
-                    json.dump(cb_ctx, f, indent=4)
-                    epoch_callback(cb_ctx)
+                    json.dump(all_contexts, f, indent=4)
+                epoch_callback(cb_ctx)
                 accelerator.unwrap_model(model).save_pretrained(
                     os.path.join(checkpoint, "dist/")
                 )
