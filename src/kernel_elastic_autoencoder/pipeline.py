@@ -52,6 +52,7 @@ class Pipeline:
         latents: torch.Tensor,
         sequences: list[str],
         conditions: list[list[float]] | torch.Tensor,
+        with_grad: bool = False,
         **kwargs,
     ) -> Iterable[str]:
         """Completes each conditioned input sequence.
@@ -181,14 +182,15 @@ class Pipeline:
             condition_embeddings=conds_embed,
             token_mask=token_mask,
         )
+        odds = logits.log_softmax(dim=-1)
         new_toks = (
-            torch.topk(logits[:, -1:], k=beam_size, dim=-1)
+            torch.topk(odds[:, -1:], k=beam_size, dim=-1)
             .indices.flatten()
             .unsqueeze(-1)
             .to(torch.long)
         )
         new_probs = (
-            torch.topk(logits[:, -1:], k=beam_size, dim=-1)
+            torch.topk(odds[:, -1:], k=beam_size, dim=-1)
             .values.flatten()
             .unsqueeze(-1)
         )
@@ -263,7 +265,7 @@ class Pipeline:
             top_prob_inds = (
                 (
                     top_probs.sum(dim=-1)
-                    * (grouped_ids != self.tokenizer.eos_token_id)
+                    / torch.sqrt(grouped_ids != self.tokenizer.pad_token_id)
                     .to(torch.long)
                     .sum(dim=-1)
                 )
@@ -295,7 +297,7 @@ class Pipeline:
         top_prob_inds = (
             (
                 top_probs.sum(dim=-1)
-                * (grouped_ids != self.tokenizer.eos_token_id)
+                / torch.sqrt(grouped_ids != self.tokenizer.pad_token_id)
                 .to(torch.long)
                 .sum(dim=-1)
             )
