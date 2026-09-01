@@ -265,9 +265,7 @@ class Pipeline:
             top_prob_inds = (
                 (
                     top_probs.sum(dim=-1)
-                    / torch.sqrt(grouped_ids != self.tokenizer.pad_token_id)
-                    .to(torch.long)
-                    .sum(dim=-1)
+                    / torch.sqrt((grouped_ids != self.tokenizer.pad_token_id).to(torch.long).sum(dim=-1))
                 )
                 .topk(k=beam_size, dim=1)
                 .indices.squeeze(-1)
@@ -297,9 +295,7 @@ class Pipeline:
         top_prob_inds = (
             (
                 top_probs.sum(dim=-1)
-                / torch.sqrt(grouped_ids != self.tokenizer.pad_token_id)
-                .to(torch.long)
-                .sum(dim=-1)
+                / torch.sqrt((grouped_ids != self.tokenizer.pad_token_id).to(torch.long).sum(dim=-1))
             )
             .topk(k=1, dim=1)
             .indices.squeeze(-1)
