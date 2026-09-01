@@ -61,8 +61,11 @@ class Loss(nn.Module):
         """Sequence length dimension to which inputs are pooled after condition concatenation through the
                 encoder. Proportional to the dimension of latent vectors."""
 
-        self.register_buffer("_loc", torch.zeros(self.pooling_dim * self.embedding_dim))
-        self.register_buffer("_cov", torch.eye(self.pooling_dim * self.embedding_dim))
+        mvn = torch.distributions.MultivariateNormal(
+            loc=torch.zeros(self.pooling_dim * self.embedding_dim),
+            covariance_matrix=torch.eye(self.pooling_dim * self.embedding_dim),
+        )
+        self.register_buffer("_samples", mvn.sample((self.kernel_dist_size,)))
 
     def forward(
         self,
@@ -110,11 +113,7 @@ class Loss(nn.Module):
         self,
         latents: torch.Tensor,
     ) -> torch.Tensor:
-        mvn = torch.distributions.MultivariateNormal(
-            loc=self._loc,  # type: ignore
-            covariance_matrix=self._cov,  # type: ignore
-        )
-        samples = mvn.rsample((self.kernel_dist_size,)).to(latents.device)
+        samples = self._samples
         square_difference_sum = torch.cdist(latents, samples, p=2.0).pow(2)
         kernel_pairwise_sum = torch.exp(
             ((-1 / (self.pooling_dim * self.embedding_dim)) * square_difference_sum)
