@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.4.1 (2026-09-01)
+
+### Bug Fixes
+
+- Repair beam_completion length normalization again
+  ([`3ab64d2`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/3ab64d2ab900ba3cfbdd452a4a2d61877dba28cd))
+
+
 ## v3.4.0 (2026-09-01)
 
 ### Bug Fixes
