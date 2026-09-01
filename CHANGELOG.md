@@ -2,6 +2,42 @@
 
 <!-- version list -->
 
+## v3.4.0 (2026-09-01)
+
+### Bug Fixes
+
+- Append all logs
+  ([`7db3d74`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/7db3d7441d34ceba273c98c2e170441304bb7049))
+
+- Check is_main_process properly
+  ([`7e2f913`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/7e2f91390f7aa385b5e9cc627c36a73276e0d521))
+
+- Log to json by default
+  ([`d7ecf1c`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/d7ecf1c1761d76f754377e0bd26e1839e69a0df9))
+
+- Only log callbacks in main process
+  ([`0c62e42`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/0c62e427ab5a8affaddeb6301bbac10605923049))
+
+- Repair beam_completion length normalization
+  ([`7548531`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/75485316cc2e47d231e6be7bf4a1b10c5e140e23))
+
+- **logging**: Correct loss callback returns
+  ([`83551f4`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/83551f4eee13f4aefa32b340702681b4392d0407))
+
+### Features
+
+- Add default gradient clipping to training
+  ([`dd44e35`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/dd44e35b0a64a4bfe6169052b8757437223f8b8a))
+
+- **logging**: Log gradident norm, distribution var and mean, losses to callback
+  ([`aab769d`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/aab769d71cd2f61055639492b938d85e24d10d26))
+
+### Refactoring
+
+- **perf**: Pre-draw and buffer m-MMD samples
+  ([`49e8e18`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/49e8e18aea3993f5721da651e7c5458ce1093fd6))
+
+
 ## v3.3.6 (2026-08-30)
 
 ### Bug Fixes
