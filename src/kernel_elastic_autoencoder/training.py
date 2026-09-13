@@ -194,7 +194,7 @@ class Trainer:
 
             curr_epoch += 1
             accelerator.wait_for_everyone()
-            accelerator.save_state(checkpoint)
+            accelerator.save_state(checkpoint, safe_serialization=False, save_on_each_node=True)
             if accelerator.is_main_process:
                 os.makedirs(os.path.join(checkpoint, "dist/"), exist_ok=True)
                 all_contexts.append(cb_ctx)
