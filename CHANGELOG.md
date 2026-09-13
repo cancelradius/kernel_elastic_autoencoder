@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v3.5.0 (2026-09-13)
+
+### Bug Fixes
+
+- Allow training checkpoints to be saved unsafely
+  ([`d09a5d1`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/d09a5d18df9572c04056ca569a2a8b5f10da4989))
+
+- Force save weights on each node
+  ([`b125d2e`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/b125d2e00015d95a95eb3ae95a89c8388e1b1ee4))
+
+### Features
+
+- Length normalization hyperparameter in beam_completion
+  ([`6f4353e`](https://github.com/cancelradius/kernel_elastic_autoencoder/commit/6f4353ed0fd41005683ce9231a528dff2c9e3364))
+
+
 ## v3.4.1 (2026-09-01)
 
 ### Bug Fixes
