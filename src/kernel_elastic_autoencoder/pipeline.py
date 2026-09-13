@@ -52,7 +52,6 @@ class Pipeline:
         latents: torch.Tensor,
         sequences: list[str],
         conditions: list[list[float]] | torch.Tensor,
-        with_grad: bool = False,
         **kwargs,
     ) -> Iterable[str]:
         """Completes each conditioned input sequence.
@@ -131,6 +130,7 @@ class Pipeline:
         beam_size: int,
         sequences: list[str],
         conditions: list[list[float]] | torch.Tensor,
+        hp_alpha: float = 0.5,
         **kwargs,
     ) -> Iterable[str]:
         """Completes each conditioned input sequence, using the beam search strategy.
@@ -144,6 +144,7 @@ class Pipeline:
             beam_size: Beam size of first step.
             sequences: List of text sequences to complete.
             conditions: List of condition value lists per batch.
+            hp_alpha: Strength of length normalization.
             **kwargs: Additional keyword arguments passed to Tokenizer.encode.
 
         Returns:
@@ -265,7 +266,7 @@ class Pipeline:
             top_prob_inds = (
                 (
                     top_probs.sum(dim=-1)
-                    / torch.sqrt((grouped_ids != self.tokenizer.pad_token_id).to(torch.long).sum(dim=-1))
+                    / torch.pow((grouped_ids != self.tokenizer.pad_token_id).to(torch.long).sum(dim=-1), hp_alpha)
                 )
                 .topk(k=beam_size, dim=1)
                 .indices.squeeze(-1)
@@ -295,7 +296,7 @@ class Pipeline:
         top_prob_inds = (
             (
                 top_probs.sum(dim=-1)
-                / torch.sqrt((grouped_ids != self.tokenizer.pad_token_id).to(torch.long).sum(dim=-1))
+                / torch.pow((grouped_ids != self.tokenizer.pad_token_id).to(torch.long).sum(dim=-1), hp_alpha)
             )
             .topk(k=1, dim=1)
             .indices.squeeze(-1)
